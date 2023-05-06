@@ -1,0 +1,67 @@
+# A -> B | B A                A -> B+
+# A -> . | B A                A -> B*
+# A -> B X | C X | D X        A -> (B | C | D) X
+# A -> B | B C                A -> B C?
+# A -> B* . B -> CD           A -> (CD)*
+
+<prog> ::= ( <stmt> )* EOF .
+
+# Statements
+<stmt> ::= ( <decl_stmt> | <cpmd_stmt> ) .
+
+# Declaration statements
+<decl_stmt> ::= <var_decl> NEWLINE
+<var_decl> ::= "no" IDENTIFIER ( "=" <expr> )?
+
+# Compound statements
+<cpmd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <std_stmt> ) .
+<if_stmt> ::= "if" <expr> NEWLINE <body> ( "else" NEWLINE <body> )? .
+<while_loop> ::= "while" <expr> NEWLINE <body>
+<for_loop> ::= "for" IDENTIFIER "in" <expr> NEWLINE <body>
+
+# Standard statements
+<std_stmt> ::= ( <print_stmt> | <expr_stmt> ) NEWLINE .
+<print_stmt> ::= "nolout" "(" <expr> ")" . # TEMP, until we have function calls
+<expr_stmt> ::= <expr>
+
+<body> ::= INDENT ( <stmt> )+ DEDENT
+
+# Operator precedence
+# Op                Symbol          Precedence
+# assignment          =               lowest
+# logical or          or                1
+# logical and        and                2
+# logical not        not                3
+# relational      <,>,<=,>=             4
+# equalities        ==,!=               5
+# addition           +,-                6
+# multiplication    *,/,%               7
+# unary              +,-                8
+# exponentiation     **               highest
+
+<expr> ::= <assign_expr> .
+
+<assign_expr> ::= IDENTIFIER "=" <assign_expr> | <or_expr> .
+
+<or_expr>  ::= <and_expr> ( "or"  <and_expr> )* .
+<and_expr> ::= <not_expr> ( "and" <not_expr> )* .
+<not_expr> ::= "not" <not_expr> | <eq_expr> .  # allow "not not ... True"
+
+<eq_expr>  ::= <rel_expr> ( ( "==" | "!=" ) <not_expr> )* .
+<rel_expr> ::= <add_expr> ( ( "<" | ">" | "<=" | ">=" ) <add_expr> )* .
+
+<add_expr> ::= <mul_expr> ( ( "+" | "-" ) <mul_expr> )* .
+<mul_expr> ::= <sign_expr> ( ( "*" | "/" | "%" ) <sign_expr> )* .
+<sign_expr> ::= ( "+" | "-" ) <sign_expr> | <exp_expr> .
+<exp_expr> ::= <input_expr> ( "**" <sign_expr> )? .
+
+<input_expr> ::= "nolin" "(" <expr> ")" | <factor> . # TEMP, until we have function calls
+
+<factor> ::= INT_LITERAL
+           | FLOAT_LITERAL
+           | STR_LITERAL
+           | IDENTIFIER
+           | "True"
+           | "False"
+           | "nol"
+           | "(" <expr> ")" .
