@@ -1,15 +1,15 @@
 
-from nl_astvisitor import ASTVisitor
-from nl_expressions import *
-from nl_statements import *
+from .astvisitor import ASTVisitor
+from ..parser.expressions import *
+from ..parser.statements import *
 
-from nl_util import py_type_to_nl
+from ..util.util import py_type_to_nl
 
 class ASTPrinter(ASTVisitor):
     def explore(self, program: list[Statement]):
         for stmt in program:
             print(stmt.visit(self))
-    
+
     def visit_vardecl(self, stmt: VarDeclaration):
         return f'no {stmt.id} = {stmt.init.visit(self) if stmt.has_initializer() else "nol"}'
 

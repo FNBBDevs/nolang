@@ -1,17 +1,17 @@
 
-from nl_lexer import Token
+from ..lexer.lexer import Token
 
 # Forward declare the visitor interface
 class ASTVisitor: pass
 
 # NOTE: Expressions in nolang can cause mutations in the state of the program (Such as with assignment).
-# The resulting interpretation of any expression thus results in not just a value but also a new program state. 
+# The resulting interpretation of any expression thus results in not just a value but also a new program state.
 
 class Expression:
     def visit(self, _: ASTVisitor):
         """Pure virtual function that calls respective handler for this type in the visitor"""
         raise NotImplementedError
-    
+
     def file_name(self) -> str:
         """Pure virtual function that calls respective handler for this type in the visitor"""
         raise NotImplementedError
@@ -33,7 +33,7 @@ class BinaryExpression(Expression):
 
     def __repr__(self) -> str:
         return f'{self.left} {self.op} {self.right}'
-        
+
 class UnaryExpression(Expression):
     """Postfix/Prefix operator with one operand"""
 
@@ -50,7 +50,7 @@ class UnaryExpression(Expression):
 
     def __repr__(self) -> str:
         return f'{self.op} {self.operand}'
-    
+
 class AssignExpression(Expression):
     def __init__(self, id: Token, new: Expression) -> None:
         super().__init__()
@@ -59,10 +59,10 @@ class AssignExpression(Expression):
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_assign(self)
-    
+
     def file_name(self) -> str:
         return self.id.file_name
-    
+
     def __repr__(self) -> str:
         return f'{self.id} = {self.new}'
 
@@ -75,16 +75,16 @@ class Literal(Expression):
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_literal(self)
-    
+
     def file_name(self) -> str:
         return self.token.file_name
 
     def value(self):
         return self.token.value
-    
+
     def __repr__(self) -> str:
         return str(self.token.value)
-    
+
 class Identifier(Expression):
     """Aliased value saved in the store"""
 
@@ -94,12 +94,12 @@ class Identifier(Expression):
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_identifier(self)
-    
+
     def file_name(self) -> str:
         return self.id.file_name
-    
+
     def name(self):
         return self.id.value
-    
+
     def __repr__(self) -> str:
         return str(self.id.value)

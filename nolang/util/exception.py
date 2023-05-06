@@ -1,8 +1,9 @@
 
-from ast import Expression
-from nl_token import Token
-from nl_util import py_type_to_nl
-from nl_util import stringify
+from ..parser.expressions import Expression
+from ..lexer.token import Token
+
+from .util import py_type_to_nl
+from .util import stringify
 
 class NolangException(Exception):
     def __init__(self, line: int, file_name: str, *args: object) -> None:
@@ -12,7 +13,7 @@ class NolangException(Exception):
 
     def __str__(self) -> str:
         return f'A nolang exception has occured! {self._loc_str()}'
-    
+
     def _loc_str(self) -> str:
         return f'\'{self.file_name}\':{self.line}'
 
@@ -38,7 +39,7 @@ class EOFUnexpectedException(NolangException):
 
     def __str__(self) -> str:
         return f'Reached EOF unexpectedly while parsing {self.file_name}'
-    
+
 class InvalidBindExpcetion(NolangException):
     def __init__(self, expr: Expression, *args: object) -> None:
         super().__init__(*args)
@@ -46,7 +47,7 @@ class InvalidBindExpcetion(NolangException):
 
     def __str__(self) -> str:
         return f'Cannot bind to non-lvalue expression {self.expr} {self._loc_str()}'
-    
+
 class RuntimeException(NolangException):
     def __init__(self, *args: object, message: str = 'A nolang runtime exception has occured!') -> None:
         super().__init__(*args)
@@ -54,7 +55,7 @@ class RuntimeException(NolangException):
 
     def __str__(self) -> str:
         return f'{self.message} \'{self.file_name}\':{self.line}'
-    
+
 class InvalidTypeException(RuntimeException):
     def __init__(self, op: Token, operand, *args: object) -> None:
         super().__init__(op.line, op.file_name, *args)
@@ -63,7 +64,7 @@ class InvalidTypeException(RuntimeException):
 
     def __str__(self) -> str:
         return f'Invalid operand {py_type_to_nl(type(self.operand))} ({stringify(self.operand)}) for operator \'{self.op}\' {self._loc_str()}'
-    
+
 class IncompatibleTypesException(RuntimeException):
     def __init__(self, op: Token, operand1, operand2, *args: object) -> None:
         super().__init__(op.line, op.file_name, *args)
@@ -73,17 +74,17 @@ class IncompatibleTypesException(RuntimeException):
 
     def __str__(self) -> str:
         return f'Operator \'{self.op}\' on incompatible types {self._operands_str()} {self._loc_str()}'
-    
+
     def _operands_str(self) -> str:
         return f'{py_type_to_nl(type(self.operand1))} ({stringify(self.operand1)}) and {py_type_to_nl(type(self.operand2))} ({stringify(self.operand2)})'
-    
+
 class DivideByZeroException(RuntimeException):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
     def __str__(self) -> str:
         return f'Divide by zero {self._loc_str()}'
-    
+
 class VariableRedefinitionException(RuntimeException):
     def __init__(self, name: str, *args: object) -> None:
         super().__init__(*args)
@@ -91,7 +92,7 @@ class VariableRedefinitionException(RuntimeException):
 
     def __str__(self) -> str:
         return f'{self.name} has already been defined in this scope {self._loc_str()}'
-    
+
 class VariableNotDefinedException(RuntimeException):
     def __init__(self, name: str, *args: object) -> None:
         super().__init__(*args)

@@ -1,11 +1,11 @@
 import sys
 
-from nl_lexer import Lexer
-from nl_parser import Parser
-from nl_interpreter import Interpreter
+from nolang.lexer.lexer import Lexer
+from nolang.parser.parser import Parser
+from nolang.astvisitors.interpreter import Interpreter
 
-from nl_exception import RuntimeException
-from nl_log import log_error
+from nolang.util.exception import RuntimeException
+from nolang.util.log import log_error
 
 lex = Lexer()
 parser = Parser()
@@ -38,7 +38,7 @@ def exec_source(source: str, file_name: str):
 
     if tokens is None:
         return
-    
+
     stmts = parser.parse(tokens, file_name)
 
     if stmts is None:

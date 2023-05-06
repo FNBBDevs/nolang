@@ -21,9 +21,10 @@ def py_type_to_nl(t: type):
 def stringify(val) -> str:
     if val is None:
         return 'nol'
-    
+
     try:
         return str(val)
-    
+
+    # TODO: Find a better way to do this to print large numbers!
     except ValueError:
-        return 'Too big to be a printed!'
+        return 'Too big to be a stringified!'

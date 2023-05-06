@@ -1,15 +1,12 @@
 
-from nl_token import Token
-from nl_token import Tokens
-from nl_expressions import *
-from nl_statements import *
+from ..lexer.token import Token
+from ..lexer.token import Tokens
+from .expressions import *
+from .statements import *
 
-from nl_exception import InvalidBindExpcetion, NolangException
-from nl_exception import EOFUnexpectedException
-from nl_exception import TokenUnexpectedException
-from nl_log import log_error
+from ..util.exception import *
+from ..util.log import log_error
 
-# Recursive Descent Parser
 class Parser:
     def parse(self, tokens: list[Token], filename: str) -> list[Statement]:
         self.tokens = tokens
@@ -29,7 +26,7 @@ class Parser:
         stmts: list[Statement] = []
 
         self._consume(Tokens.INDENT)
-        
+
         # We require atleast one statement
         stmts.append(self.statement())
 
@@ -45,12 +42,12 @@ class Parser:
 
             else:
                 stmt = self.cmpd_stmt()
-            
+
             return stmt
 
         except NolangException as e:
             # TODO: Use new python feature for sending multiple exceptions?
-            
+
             log_error(str(e))
             self._next_statment()
 
@@ -95,11 +92,11 @@ class Parser:
         return WhileStatement(cond, while_body, else_body)
 
     def std_stmt(self) -> Statement:
-        if self._next_is(Tokens.NOLOUT): 
+        if self._next_is(Tokens.NOLOUT):
             stmt = self.print_stmt()
         else:
             stmt = self.expr_stmt()
-        
+
         self._consume(Tokens.NEWLINE)
         return stmt
 
@@ -129,7 +126,7 @@ class Parser:
             # We know that we have an identifier now
             lhs: Identifier
             return AssignExpression(lhs.id, self.assign_expr())
-        
+
         return lhs
 
     def or_expr(self) -> Expression:
@@ -141,7 +138,7 @@ class Parser:
             expr = BinaryExpression(expr, right, op)
 
         return expr
-    
+
     def and_expr(self) -> Expression:
         expr: Expression = self.not_expr()
 
@@ -151,7 +148,7 @@ class Parser:
             expr = BinaryExpression(expr, right, op)
 
         return expr
-    
+
     def not_expr(self) -> Expression:
         if self._next_is(Tokens.NOT):
             op: Token = self._previous()
@@ -159,7 +156,7 @@ class Parser:
             return UnaryExpression(right, op)
 
         return self.eq_expr()
-    
+
     def eq_expr(self) -> Expression:
         expr: Expression = self.rel_expr()
 
@@ -169,7 +166,7 @@ class Parser:
             expr = BinaryExpression(expr, right, op)
 
         return expr
-    
+
     def rel_expr(self) -> Expression:
         expr: Expression = self.add_expr()
 
@@ -179,7 +176,7 @@ class Parser:
             expr = BinaryExpression(expr, right, op)
 
         return expr
-    
+
     def add_expr(self) -> Expression:
         expr: Expression = self.mul_expr()
 
@@ -189,7 +186,7 @@ class Parser:
             expr = BinaryExpression(expr, right, op)
 
         return expr
-    
+
     def mul_expr(self) -> Expression:
         expr: Expression = self.sign_expr()
 
@@ -199,7 +196,7 @@ class Parser:
             expr = BinaryExpression(expr, right, op)
 
         return expr
-    
+
     def sign_expr(self) -> Expression:
         if self._next_is(Tokens.PLUS, Tokens.MINUS):
             op: Token = self._previous()
@@ -207,7 +204,7 @@ class Parser:
             return UnaryExpression(right, op)
 
         return self.exp_expr()
-    
+
     def exp_expr(self) -> Expression:
         expr: Expression = self.input_expr()
 
@@ -225,22 +222,22 @@ class Parser:
             expr = self.expression()
             self._consume(Tokens.R_PARENTHESIS)
             return UnaryExpression(expr, token)
-        
+
         return self.factor()
 
     def factor(self) -> Expression:
         if self._next_is(
-            Tokens.INT_LITERAL, 
-            Tokens.FLOAT_LITERAL, 
+            Tokens.INT_LITERAL,
+            Tokens.FLOAT_LITERAL,
             Tokens.STR_LITERAL,
-            Tokens.TRUE, 
-            Tokens.FALSE, 
+            Tokens.TRUE,
+            Tokens.FALSE,
             Tokens.NOL):
             return Literal(self._previous())
-        
+
         if self._next_is(Tokens.IDENTIFIER):
             return Identifier(self._previous())
-        
+
         self._consume(Tokens.L_PARENTHESIS)
         expr: Expression = self.expression()
         self._consume(Tokens.R_PARENTHESIS)
@@ -255,26 +252,26 @@ class Parser:
             if self._current_is(type_id):
                 self._advance()
                 return True
-        
+
         return False
-    
+
     def _consume(self, *types: Tokens) -> Token:
         """Consume the next token if it is any of types, raise an exception otherwise"""
-        
+
         for type_id in types:
             if self._current_is(type_id):
                 return self._advance()
-        
+
         if self._at_end() or self._peek().type_id == Tokens.EOF:
             self._error(EOFUnexpectedException(self.filename))
-        
+
         self._error(TokenUnexpectedException(self._peek()))
 
     def _current_is(self, type_id: Tokens) -> bool:
         """Checks if the current token is of type_id without consuming"""
         if self._at_end():
             return False
-        
+
         return self._peek().type_id == type_id
 
     def _advance(self) -> Token:
@@ -303,7 +300,7 @@ class Parser:
 
     def _at_end(self) -> bool:
         return self.current == len(self.tokens)
-    
+
     def _error(self, exception: Exception):
         # We have encountered errors so we should no longer return a parse tree
         self.panic = True

@@ -1,27 +1,23 @@
 
-from nl_astvisitor import ASTVisitor
-from nl_expressions import *
-from nl_statements import *
+from .astvisitor import ASTVisitor
+from ..parser.expressions import *
+from ..parser.statements import *
+from ..lexer.token import Tokens
 
-from nl_util import stringify
-
-from nl_token import Tokens
-from nl_exception import InvalidTypeException, VariableNotDefinedException, VariableRedefinitionException
-from nl_exception import IncompatibleTypesException
-from nl_exception import RuntimeException
-from nl_exception import DivideByZeroException
+from ..util.exception import *
+from ..util.util import stringify
 
 class Environment: pass
 class Environment:
     """
     The environment consists of a mapping or binding of names to values.
     It also contains a reference to the parent or "enclosing" environment.
-    
+
     We could have an intermediary known as the 'store' which acts as main
-    memory and stores values at addresses while the environment stores 
+    memory and stores values at addresses while the environment stores
     name and address bindings.
 
-    Or we could have the environment directly map to the values using a 
+    Or we could have the environment directly map to the values using a
     hashmap structure.
     """
 
@@ -47,7 +43,7 @@ class Environment:
             return
 
         # If not found search for the variable in parent scope
-        if self.enclosing: 
+        if self.enclosing:
             self.enclosing.assign(id, value)
             return
 
@@ -58,11 +54,11 @@ class Environment:
 
         if name in self.values:
             return self.values[name]
-        
+
         # If not found search for the variable in parent scope
-        if self.enclosing: 
+        if self.enclosing:
             return self.enclosing.get(id)
-        
+
         raise VariableNotDefinedException(name, id.line, id.file_name)
 
 class Interpreter(ASTVisitor):
@@ -72,10 +68,10 @@ class Interpreter(ASTVisitor):
         try:
             for stmt in program:
                 stmt.visit(self)
-                
+
         except RuntimeException as e:
             raise e
-        
+
         # Catch python exceptions
         except Exception as e:
             raise RuntimeException(-1, stmt.file_name(), message = f'{repr(e)} - This is an internal error')
@@ -98,7 +94,7 @@ class Interpreter(ASTVisitor):
     def visit_whileloop(self, stmt: WhileStatement):
         while self._to_truthy(stmt.cond.visit(self)):
             self._execute_body(stmt.while_body)
-        
+
         else:
             if stmt.else_body:
                 self._execute_body(stmt.else_body)
@@ -120,11 +116,11 @@ class Interpreter(ASTVisitor):
 
         # Make OR and AND operators short-circuited, we DO NOT evaluate RHS unless we have to
         match expr.op.type_id:
-            case Tokens.OR: 
+            case Tokens.OR:
                 return Interpreter._to_truthy(val1) \
                     or Interpreter._to_truthy(expr.right.visit(self))
-            
-            case Tokens.AND: 
+
+            case Tokens.AND:
                 return Interpreter._to_truthy(val1) \
                    and Interpreter._to_truthy(expr.right.visit(self))
 
@@ -134,44 +130,44 @@ class Interpreter(ASTVisitor):
         match expr.op.type_id:
             case Tokens.EQUAL: return val1 == val2
             case Tokens.NEQUAL: return val1 != val2
-            case Tokens.LESS_THAN: 
+            case Tokens.LESS_THAN:
                 Interpreter._check_ordering(val1, val2, expr.op)
                 return val1 < val2
-            
-            case Tokens.GREATER_THAN: 
+
+            case Tokens.GREATER_THAN:
                 Interpreter._check_ordering(val1, val2, expr.op)
                 return val1 > val2
-            
-            case Tokens.LESS_THAN_EQ: 
+
+            case Tokens.LESS_THAN_EQ:
                 Interpreter._check_ordering(val1, val2, expr.op)
                 return val1 <= val2
-            
-            case Tokens.GREATER_THAN_EQ: 
+
+            case Tokens.GREATER_THAN_EQ:
                 Interpreter._check_ordering(val1, val2, expr.op)
                 return val1 >= val2
-            
-            case Tokens.PLUS: 
+
+            case Tokens.PLUS:
                 val1, val2 = Interpreter._check_summable(val1, val2, expr.op)
                 return val1 + val2
-            
-            case Tokens.MINUS: 
+
+            case Tokens.MINUS:
                 Interpreter._check_numerics(val1, val2, expr.op)
                 return val1 - val2
-            
-            case Tokens.STAR: 
+
+            case Tokens.STAR:
                 Interpreter._check_numerics(val1, val2, expr.op)
                 return val1 * val2
-            
-            case Tokens.SLASH: 
+
+            case Tokens.SLASH:
                 Interpreter._check_numerics(val1, val2, expr.op)
                 if val2 == 0:
                     raise DivideByZeroException(expr.op.line, expr.op.file_name)
                 return val1 / val2
-            
-            case Tokens.PERCENT: 
+
+            case Tokens.PERCENT:
                 Interpreter._check_numerics(val1, val2, expr.op)
                 return val1 % val2
-            
+
             case Tokens.EXP:
                 Interpreter._check_numerics(val1, val2, expr.op)
                 return val1 ** val2
@@ -184,10 +180,10 @@ class Interpreter(ASTVisitor):
 
         match expr.op.type_id:
             case Tokens.NOT: return not Interpreter._to_truthy(val)
-            case Tokens.MINUS: 
+            case Tokens.MINUS:
                 self._check_numeric(val, expr.op)
                 return -val
-            case Tokens.PLUS: 
+            case Tokens.PLUS:
                 self._check_numeric(val, expr.op)
                 return +val
             case Tokens.NOLIN:
@@ -224,13 +220,13 @@ class Interpreter(ASTVisitor):
         for t in types:
             if type(val) is t:
                 return True
-            
+
         return False
-    
+
     @staticmethod
     def _is_numeric(val):
         return Interpreter._is_type(val, int, float)
-    
+
     @staticmethod
     def _to_truthy(val):
         if val is None: return False
@@ -248,7 +244,7 @@ class Interpreter(ASTVisitor):
         """Checks if both values are of numeric type"""
         Interpreter._check_numeric(val1, op)
         Interpreter._check_numeric(val2, op)
-        
+
     @staticmethod
     def _check_ordering(val1, val2, op: Token):
         """Checks if there is an ordering between the two input values"""
@@ -277,7 +273,7 @@ class Interpreter(ASTVisitor):
         """Checks if value is any of the provided types"""
         if not Interpreter._is_type(val, *types):
             raise InvalidTypeException(op, val)
-        
+
     @staticmethod
     def _check_types(val1, val2, op, *types: type):
         """Checks if both values are any of the provided types"""
