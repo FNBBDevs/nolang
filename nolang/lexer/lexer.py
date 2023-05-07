@@ -172,26 +172,41 @@ class Lexer:
     ### Substates ###
 
     def _process_string_literal(self, end) -> None:
+
+        # Start with empty char buffer
+        val : list[str] = []
+
         while self._peek() != end:
             if self._at_end():
                 log_error(f'Unterminated string literal: {self.file_name}:{self.line}')
                 return
 
-            c = self._advance()
-            if c == '\n':
+            next_char = self._advance()
+
+            # Multiline string
+            if next_char == '\n':
                 self.line += 1
+                continue
+
+            # Encountered an escape sequence
+            if next_char == '\\':
+                match self._advance():
+                    case '\\': next_char = '\\'
+                    case '"':  next_char = '"'
+                    case "'":  next_char = "'"
+                    case 'n':  next_char = '\n'
+                    case 'r':  next_char = '\r'
+                    case 'b':  next_char = '\b'
+                    case 'v':  next_char = '\v'
+                    case 't':  next_char = '\t'
+                    case 'a':  next_char = '\a'
+                    case   _:  log_error(f'Unknown escape sequence character: {self.file_name}:{self.line}')
+
+            val.append(next_char)
 
         # Consume closing quote
         self._advance()
-
-        # NOTE: Process escape sequences here...
-        # TODO: Yea... this probably isn't the best way...
-        val = self._current_lexeme(1, -1)
-        val = val.replace(r'\n', '\n')
-        val = val.replace(r'\t', '\t')
-        val = val.replace(r'\a', '\a')
-
-        self._gen_token(Tokens.STR_LITERAL, val)
+        self._gen_token(Tokens.STR_LITERAL, ''.join(val))
 
     def _process_number_literal(self) -> None:
         # Consume all next digits
