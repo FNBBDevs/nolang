@@ -41,8 +41,7 @@ class Lexer:
 
     def scan(self, source: str, file_name: str = None) -> list[Tokens]:
         """Scan source string and generate stream of tokens"""
-
-        self.source = f'{source}\n'
+        self.source = source
         self.file_name = file_name
         self.had_error = False
 
@@ -52,8 +51,8 @@ class Lexer:
         # Current character in current lexeme
         self.current: int = 0
 
-        # Current line in the source
-        self.line: int = 0
+        # Current line in the source, we start at 1
+        self.line: int = 1
 
         # List of tokens extracted
         self.tokens: list[Token] = []
@@ -62,7 +61,7 @@ class Lexer:
         self.indent_stack: list[int] = [0]
 
         while not self._at_end():
-            self._process_newline()
+            self._scan_nextline()
 
         # Make sure to reset back to indentation level 0!
         while self.indent_stack[-1] != 0:
@@ -75,32 +74,29 @@ class Lexer:
 
     ### Mainstates ###
 
-    def _process_newline(self) -> None:
+    def _scan_nextline(self) -> None:
+        """
+        Scans the next 'line' of tokens. This may span more than one actual line from the source code.
+        'Line' refers to actual code present up to the next newline '\n' character. Any whitespace, newlines
+        and comments present before this do not count.
+        """
 
-        self.line += 1
-
-        # We gather as many consecutive newlines as we can
+        # We first consume as many consecutive newlines as we see
         while self._next_is('\n'):
             self.line += 1
 
         # Check for indentation level
-        indentation = 0
-        while self._peek() == ' ' or self._peek() == '\t':
-            c = self._advance()
-
-            # A space increments indentation level by one
-            # A tab increases the indentation to the next multiple of 4
-            indentation += int(c == ' ') + int(c == '\t') * (4 - (indentation % 4))
+        indentation = self._consume_indentation()
 
         # This was just an empty line, throw away everything...
-        if self._next_is('\n'): return
+        if self._at_end() or self._peek() == '\n': return
 
         # Comments in this state are ignored all the way to the next newline
-        elif self._next_is('#'):
+        if self._next_is('#'):
             self._goto_next('\n')
             return
 
-        # Now we know we are moving to the general state we may need to generate
+        # Now we know we are moving to the GENERIC state we may need to generate
         # an indent or a dedent token before proceeding.
         top = self.indent_stack[-1]
 
@@ -122,50 +118,44 @@ class Lexer:
                 self.had_error = True
 
         # Process the actual code
-        while not self._at_end() and not self._next_is('\n'):
+        while not self._at_end() and self._peek() != '\n':
             self.start = self.current
-            self._process_all()
+            self._scan_next_token()
 
-        # We have completed a line, generate a token!
         self._gen_token(Tokens.NEWLINE)
 
-    def _process_all(self) -> None:
+    def _scan_next_token(self) -> None:
 
         c = self._advance()
         had_error = False
 
         match c:
-            case '(':  self._gen_token(Tokens.L_PARENTHESIS)
-            case ')':  self._gen_token(Tokens.R_PARENTHESIS)
-            case ',':  self._gen_token(Tokens.COMMA)
-            case '+':  self._gen_token(Tokens.PLUS)
-            case '-':  self._gen_token(Tokens.MINUS)
-            case '/':  self._gen_token(Tokens.SLASH)
-            case '%':  self._gen_token(Tokens.PERCENT)
-            case '*':
-                self._gen_token(Tokens.EXP if self._next_is('*') else Tokens.STAR)
-            case '<':
-                self._gen_token(Tokens.LESS_THAN_EQ if self._next_is('=') else Tokens.LESS_THAN)
-            case '>':
-                self._gen_token(Tokens.GREATER_THAN_EQ if self._next_is('=') else Tokens.GREATER_THAN)
-            case '=':
-                self._gen_token(Tokens.EQUAL if self._next_is('=') else Tokens.ASSIGN)
+            case '(': self._gen_token(Tokens.L_PARENTHESIS)
+            case ')': self._gen_token(Tokens.R_PARENTHESIS)
+            case ',': self._gen_token(Tokens.COMMA)
+            case '+': self._gen_token(Tokens.PLUS)
+            case '-': self._gen_token(Tokens.MINUS)
+            case '/': self._gen_token(Tokens.SLASH)
+            case '%': self._gen_token(Tokens.PERCENT)
+            case '*': self._gen_token(Tokens.EXP if self._next_is('*') else Tokens.STAR)
+            case '<': self._gen_token(Tokens.LESS_THAN_EQ if self._next_is('=') else Tokens.LESS_THAN)
+            case '>': self._gen_token(Tokens.GREATER_THAN_EQ if self._next_is('=') else Tokens.GREATER_THAN)
+            case '=': self._gen_token(Tokens.EQUAL if self._next_is('=') else Tokens.ASSIGN)
             case '!':
                 if self._next_is('='):
                     self._gen_token(Tokens.NEQUAL)
                 else:
                     had_error = True
-            case '"':
-                self._process_string_literal('"')
-            case '\'':
-                self._process_string_literal('\'')
 
             # We ignore white space here
             case ' ':  return
             case '\t':  return
 
             # If we encounter comment, consume upto the next newline
-            case '#': self._goto_next('\n', False)
+            case '#': self._goto_next('\n')
+
+            case '"': self._process_string_literal('"')
+            case "'": self._process_string_literal('\'')
 
             case _:
                 if is_digit(c):
@@ -243,7 +233,7 @@ class Lexer:
     ### Util ###
 
     def _advance(self) -> str:
-        """Advance a character in the source string"""
+        """Advance a character in the source string. Returns None and does not advance if at end."""
         if self._at_end():
             return
 
@@ -252,8 +242,7 @@ class Lexer:
         return cur
 
     def _peek(self, look_ahead: int = 1) -> str:
-        """Peek the next character without advancing"""
-
+        """Peek the next character without advancing. Returns None if at end or look_ahead is at end."""
         index = self.current + look_ahead - 1
 
         if self._at_end() or index >= len(self.source):
@@ -262,30 +251,42 @@ class Lexer:
         return self.source[index]
 
     def _next_is(self, c: str) -> bool:
-        """Returns whether or not the next value is 'c' and consumes the character if so"""
+        """Returns whether or not the next value is 'c' and consumes the character if so. Returns False if at end."""
         if self._at_end():
             return False
 
         if self.source[self.current] != c:
             return False
 
-        # We consume character if it was matched
         self.current += 1
         return True
 
-    def _goto_next(self, c: str, consume: bool = True) -> None:
+    def _goto_next(self, c: str) -> None:
+        """Will attempt to find the given character or, if not present, goes to end"""
         while not self._at_end() and self._peek() != c:
             self._advance()
 
-        if consume:
-            self._advance()
-
     def _at_end(self) -> bool:
+        """Returns true if there are no characters left to process, else otherwise"""
         return self.current >= len(self.source)
 
     def _gen_token(self, type_id, value = None) -> None:
+        """Generates a token of type_id with optional value at the current lexeme"""
         self.tokens.append(Token(type_id, '\0' if type_id == Tokens.EOF else self._current_lexeme(), self.line, self.file_name, value))
 
     def _current_lexeme(self, start_offset: int = 0, current_offset: int = 0) -> str:
         """Returns the current lexeme given the processing window"""
         return self.source[self.start + start_offset:self.current + current_offset]
+
+    def _consume_indentation(self):
+        """Calculates and returns any indentation level at the current processing location"""
+        indentation = 0
+
+        while self._peek() == ' ' or self._peek() == '\t':
+            c = self._advance()
+
+            # A space increments indentation level by one
+            # A tab increases the indentation to the next multiple of 4
+            indentation += int(c == ' ') + int(c == '\t') * (4 - (indentation % 4))
+
+        return indentation
