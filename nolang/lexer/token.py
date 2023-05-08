@@ -75,7 +75,4 @@ class Token:
         return self.lexeme.replace('\n', r'\n')
 
     def __repr__(self) -> str:
-        return f'{str(self)}'
-
-    # def __repr__(self) -> str:
-    #     return f'{self.type_id} ({self.value})' if self.value else f'{self.type_id} \'{str(self)}\''
+        return f'{self.type_id} ({self.value})' if self.value else f'{self.type_id} \'{str(self)}\''
