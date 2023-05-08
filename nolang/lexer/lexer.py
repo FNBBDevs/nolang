@@ -3,8 +3,8 @@ from .token import Token
 from .token import Tokens
 from .token import RESERVED_IDENTIFIERS
 
-from ..util.util import *
-from ..util.exception import *
+from ..util import *
+from ..exception import *
 
 class Lexer:
     """
@@ -71,7 +71,7 @@ class Lexer:
         self._gen_token(Tokens.EOF)
 
         if len(self.exceptions) > 0:
-            raise ExceptionGroup('Lexer exception', self.exceptions)
+            raise ExceptionGroup('Lexer exceptions', self.exceptions)
 
         return self.tokens
 

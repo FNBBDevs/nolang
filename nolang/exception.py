@@ -1,6 +1,6 @@
 
-from ..parser.expressions import Expression
-from ..lexer.token import Token
+from .parser.expressions import Expression
+from .lexer.token import Token
 
 from .util import py_type_to_nl
 from .util import stringify
@@ -78,7 +78,7 @@ class InvalidBindingException(SyntaxError):
         self.expr = expr
 
     def __str__(self) -> str:
-        return f'Cannot bind to non-lvalue expression {self.expr} {self._loc_to_str()}'
+        return f'Cannot bind to non-lvalue expression \'{self.expr}\' {self._loc_to_str()}'
 
 # Runtime Exceptions
 
