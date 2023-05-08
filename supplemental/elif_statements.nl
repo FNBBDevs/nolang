@@ -23,3 +23,12 @@ nolout(x)
 nolout(y)
 nolout(z)
 nolout(w)
+
+if True
+    nolout('Single if statement')
+
+if False
+    nolout('herm')
+
+else
+    nolout('No elif')
