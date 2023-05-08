@@ -4,14 +4,13 @@ from ..lexer.token import Tokens
 from .expressions import *
 from .statements import *
 
-from ..util.exception import *
-from ..util.log import log_error
+from ..exception import *
 
 class Parser:
     def parse(self, tokens: list[Token], filename: str) -> list[Statement]:
         self.tokens = tokens
         self.filename = filename
-        self.panic = False
+        self.exceptions = []
 
         """Current token to be examined in the current production rule"""
         self.current: int = 0
@@ -20,7 +19,10 @@ class Parser:
         while not self._next_is(Tokens.EOF) and not self._at_end():
             statements.append(self.statement())
 
-        return statements if not self.panic else None
+        if len(self.exceptions) > 0:
+            raise ExceptionGroup('Parser exceptions', self.exceptions)
+
+        return statements
 
     def body(self) -> Body:
         stmts: list[Statement] = []
@@ -46,9 +48,7 @@ class Parser:
             return stmt
 
         except NolangException as e:
-            # TODO: Use new python feature for sending multiple exceptions?
-
-            log_error(str(e))
+            self.exceptions.append(e)
             self._next_statment()
 
     def var_decl(self) -> Statement:
@@ -121,7 +121,7 @@ class Parser:
             # Must be a valid lvalue target
             if not isinstance(lhs, Identifier):
                 assign: Token = self._previous()
-                self._error(InvalidBindExpcetion(lhs, assign.line, assign.file_name))
+                raise InvalidBindingException(lhs, assign.line, assign.file_name)
 
             # We know that we have an identifier now
             lhs: Identifier
@@ -263,9 +263,9 @@ class Parser:
                 return self._advance()
 
         if self._at_end() or self._peek().type_id == Tokens.EOF:
-            self._error(EOFUnexpectedException(self.filename))
+            raise EOFUnexpectedException(self.filename)
 
-        self._error(TokenUnexpectedException(self._peek()))
+        raise TokenUnexpectedException(self._peek())
 
     def _current_is(self, type_id: Tokens) -> bool:
         """Checks if the current token is of type_id without consuming"""
@@ -300,9 +300,3 @@ class Parser:
 
     def _at_end(self) -> bool:
         return self.current == len(self.tokens)
-
-    def _error(self, exception: Exception):
-        # We have encountered errors so we should no longer return a parse tree
-        self.panic = True
-
-        raise exception

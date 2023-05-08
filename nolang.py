@@ -4,8 +4,7 @@ from nolang.lexer.lexer import Lexer
 from nolang.parser.parser import Parser
 from nolang.astvisitors.interpreter import Interpreter
 
-from nolang.util.exception import RuntimeException
-from nolang.util.log import log_error
+from nolang.exception import NolangException
 
 lex = Lexer()
 parser = Parser()
@@ -34,21 +33,17 @@ def exec_file(file_name: str):
     exec_source(source, file_name)
 
 def exec_source(source: str, file_name: str):
-    tokens = lex.scan(source, file_name)
-
-    if tokens is None:
-        return
-
-    stmts = parser.parse(tokens, file_name)
-
-    if stmts is None:
-        return
-
     try:
+        tokens = lex.scan(source, file_name)
+        stmts = parser.parse(tokens, file_name)
         visitor.explore(stmts)
 
-    except RuntimeException as e:
-        log_error(f'{type(e).__name__} "{e}"')
+    except* NolangException as eg:
+        for e in eg.exceptions:
+            log_error(f'{type(e).__name__} "{e}"')
+
+def log_error(message: str):
+    print(f'nolang: {message}', file=sys.stderr)
 
 if __name__ == '__main__':
     main()

@@ -4,8 +4,8 @@ from ..parser.expressions import *
 from ..parser.statements import *
 from ..lexer.token import Tokens
 
-from ..util.exception import *
-from ..util.util import stringify
+from ..exception import *
+from ..util import stringify
 
 class Environment: pass
 class Environment:
