@@ -1,6 +1,6 @@
 # nolang
 
-<img src="https://i.ibb.co/T18gqfk/2.png" alt="2" border="0">
+<img src="https://i.ibb.co/T18gqfk/2.png" alt="2" border="0" centered>
 
 That's Nolan-G, Nolan-Language, or No-Language. Take your pick they all work! This is the start of something truly revolutionary: a very python-like language written in python (so that it's *extra* slow ofcourse) without the python bullshit. Dedicated to [nulzo](https://github.com/nulzo) bouncin on ma member. Which is obviously a reference to my trampoline ofcourse which is something you bounce on over the weekend.
 
