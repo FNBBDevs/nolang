@@ -88,8 +88,14 @@ class Interpreter(ASTVisitor):
         cond = stmt.cond.visit(self)
         if self._to_truthy(cond):
             self._execute_body(stmt.if_body)
+            return
 
-        elif stmt.else_body:
+        for cond, body in stmt.elif_bodies:
+            if cond.visit(self):
+                self._execute_body(body)
+                return
+
+        if stmt.else_body:
             self._execute_body(stmt.else_body)
 
     def visit_whileloop(self, stmt: WhileStatement):

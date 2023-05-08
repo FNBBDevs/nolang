@@ -71,13 +71,19 @@ class Parser:
         cond = self.expression()
         self._consume(Tokens.NEWLINE)
         if_body = self.body()
+        elif_bodies = []
         else_body = None
+
+        while self._next_is(Tokens.ELIF):
+            elif_cond = self.expression()
+            self._consume(Tokens.NEWLINE)
+            elif_bodies.append(( elif_cond, self.body() ))
 
         if self._next_is(Tokens.ELSE):
             self._consume(Tokens.NEWLINE)
             else_body = self.body()
 
-        return IfStatement(cond, if_body, else_body)
+        return IfStatement(cond, if_body, elif_bodies, else_body)
 
     def while_loop(self) -> Statement:
         cond = self.expression()
