@@ -4,7 +4,7 @@ from .token import Tokens
 from .token import RESERVED_IDENTIFIERS
 
 from ..util.util import *
-from ..util.log import log_error
+from ..util.exception import *
 
 class Lexer:
     """
@@ -43,7 +43,7 @@ class Lexer:
         """Scan source string and generate stream of tokens"""
         self.source = source
         self.file_name = file_name
-        self.had_error = False
+        self.exceptions = []
 
         # Start of current lexeme
         self.start: int = 0
@@ -70,7 +70,10 @@ class Lexer:
 
         self._gen_token(Tokens.EOF)
 
-        return self.tokens if not self.had_error else None
+        if len(self.exceptions) > 0:
+            raise ExceptionGroup('Lexer exception', self.exceptions)
+
+        return self.tokens
 
     ### Mainstates ###
 
@@ -114,8 +117,7 @@ class Lexer:
 
             # Something went wrong...
             if top != indentation:
-                log_error(f'Inconsistent indentation {self.file_name}:{self.line}')
-                self.had_error = True
+                self._error(InconsistentIndentationException(self.line, self.file_name))
 
         # Process the actual code
         while not self._at_end() and self._peek() != '\n':
@@ -126,10 +128,7 @@ class Lexer:
 
     def _scan_next_token(self) -> None:
 
-        c = self._advance()
-        had_error = False
-
-        match c:
+        match self._advance():
             case '(': self._gen_token(Tokens.L_PARENTHESIS)
             case ')': self._gen_token(Tokens.R_PARENTHESIS)
             case ',': self._gen_token(Tokens.COMMA)
@@ -144,8 +143,9 @@ class Lexer:
             case '!':
                 if self._next_is('='):
                     self._gen_token(Tokens.NEQUAL)
+
                 else:
-                    had_error = True
+                    self._error(CharacterUnexpectedException('!', self.line, self.file_name))
 
             # We ignore white space here
             case ' ':  return
@@ -157,17 +157,13 @@ class Lexer:
             case '"': self._process_string_literal('"')
             case "'": self._process_string_literal('\'')
 
-            case _:
+            case c:
                 if is_digit(c):
                     self._process_number_literal()
                 elif is_alpha(c) or c == '_':
                     self._process_identifier()
                 else:
-                    had_error = True
-
-        if had_error:
-            self.had_error = True
-            log_error(f'Unexpected character: \'{c}\' {self.file_name}:{self.line}')
+                    self._error(CharacterUnexpectedException(c, self.line, self.file_name))
 
     ### Substates ###
 
@@ -178,7 +174,7 @@ class Lexer:
 
         while self._peek() != end:
             if self._at_end():
-                log_error(f'Unterminated string literal: {self.file_name}:{self.line}')
+                self._error(UnterminatedStringException(self.line, self.file_name))
                 return
 
             next_char = self._advance()
@@ -200,7 +196,7 @@ class Lexer:
                     case 'v':  next_char = '\v'
                     case 't':  next_char = '\t'
                     case 'a':  next_char = '\a'
-                    case   _:  log_error(f'Unknown escape sequence character: {self.file_name}:{self.line}')
+                    case   c:  self._error(UnknownEscapeSequenceException(c, self.line, self.file_name))
 
             val.append(next_char)
 
@@ -214,7 +210,7 @@ class Lexer:
             self._advance()
 
         # If the next character is a decimal point this may be a floating point literal
-        if self._peek() == '.' and is_digit(self._peek(2)):
+        if self._peek() == '.':
             self._advance()
 
             while is_digit(self._peek()):
@@ -305,3 +301,6 @@ class Lexer:
             indentation += int(c == ' ') + int(c == '\t') * (4 - (indentation % 4))
 
         return indentation
+
+    def _error(self, exception: NolangException) -> None:
+        self.exceptions.append(exception)
