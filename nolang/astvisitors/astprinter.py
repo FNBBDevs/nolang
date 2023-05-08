@@ -3,7 +3,7 @@ from .astvisitor import ASTVisitor
 from ..parser.expressions import *
 from ..parser.statements import *
 
-from ..util.util import py_type_to_nl
+from ..util import py_type_to_nl
 
 class ASTPrinter(ASTVisitor):
     def explore(self, program: list[Statement]):

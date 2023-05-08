@@ -37,11 +37,12 @@ class VarDeclaration(Statement):
         return self.init is not None
 
 class IfStatement(Statement):
-    def __init__(self, cond: Expression, if_body: Body, else_body: Body) -> None:
+    def __init__(self, cond: Expression, if_body: Body, elif_bodies: list[tuple[Expression, Body]], else_body: Body) -> None:
         super().__init__()
         self.cond = cond
         self.if_body = if_body
         self.else_body = else_body
+        self.elif_bodies = elif_bodies
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_ifstmt(self)

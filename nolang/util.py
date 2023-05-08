@@ -27,4 +27,4 @@ def stringify(val) -> str:
 
     # TODO: Find a better way to do this to print large numbers!
     except ValueError:
-        return 'Too big to be a stringified!'
+        return 'Too big to be stringified!'

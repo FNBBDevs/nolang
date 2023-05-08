@@ -11,6 +11,7 @@ class Tokens(Enum):
     COMMA           = auto()
     NO              = auto()
     IF              = auto()
+    ELIF            = auto()
     ELSE            = auto()
     PLUS            = auto()
     MINUS           = auto()
@@ -44,6 +45,7 @@ class Tokens(Enum):
 RESERVED_IDENTIFIERS = {
     'no': Tokens.NO,
     'if': Tokens.IF,
+    'elif': Tokens.ELIF,
     'else': Tokens.ELSE,
     'and': Tokens.AND,
     'or': Tokens.OR,
@@ -75,7 +77,4 @@ class Token:
         return self.lexeme.replace('\n', r'\n')
 
     def __repr__(self) -> str:
-        return f'{str(self)}'
-
-    # def __repr__(self) -> str:
-    #     return f'{self.type_id} ({self.value})' if self.value else f'{self.type_id} \'{str(self)}\''
+        return f'{self.type_id} ({self.value})' if self.value else f'{self.type_id} \'{str(self)}\''
