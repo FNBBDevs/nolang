@@ -62,7 +62,8 @@ class Environment:
         raise VariableNotDefinedException(name, id.line, id.file_name)
 
 class Interpreter(ASTVisitor):
-    environment = Environment()
+    def __init__(self):
+        self.environment = Environment()
 
     def explore(self, program: list[Statement]):
         try:

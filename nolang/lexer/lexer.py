@@ -293,7 +293,7 @@ class Lexer:
         """Returns the current lexeme given the processing window"""
         return self.source[self.start + start_offset:self.current + current_offset]
 
-    def _consume_indentation(self):
+    def _consume_indentation(self) -> int:
         """Calculates and returns any indentation level at the current processing location"""
         indentation = 0
 
