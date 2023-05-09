@@ -46,4 +46,7 @@ def log_error(message: str):
     print(f'nolang: {message}', file=sys.stderr)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('🤓', end='')
