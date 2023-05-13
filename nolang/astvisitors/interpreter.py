@@ -90,21 +90,21 @@ class Interpreter(ASTVisitor):
             self._execute_body(stmt.if_body)
             return
 
-        for cond, body in stmt.elif_bodies:
+        for cond, body in stmt.erm_bodies:
             if cond.visit(self):
                 self._execute_body(body)
                 return
 
-        if stmt.else_body:
-            self._execute_body(stmt.else_body)
+        if stmt.hermph_body:
+            self._execute_body(stmt.hermph_body)
 
     def visit_whileloop(self, stmt: WhileStatement):
         while self._to_truthy(stmt.cond.visit(self)):
             self._execute_body(stmt.while_body)
 
         else:
-            if stmt.else_body:
-                self._execute_body(stmt.else_body)
+            if stmt.hermph_body:
+                self._execute_body(stmt.hermph_body)
 
     def visit_printstmt(self, stmt: PrintStatement):
         val = stmt.expr.visit(self)

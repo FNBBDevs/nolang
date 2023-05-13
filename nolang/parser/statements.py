@@ -37,12 +37,12 @@ class VarDeclaration(Statement):
         return self.init is not None
 
 class IfStatement(Statement):
-    def __init__(self, cond: Expression, if_body: Body, elif_bodies: list[tuple[Expression, Body]], else_body: Body) -> None:
+    def __init__(self, cond: Expression, if_body: Body, erm_bodies: list[tuple[Expression, Body]], hermph_body: Body) -> None:
         super().__init__()
         self.cond = cond
         self.if_body = if_body
-        self.else_body = else_body
-        self.elif_bodies = elif_bodies
+        self.erm_bodies = erm_bodies
+        self.hermph_body = hermph_body
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_ifstmt(self)
@@ -51,11 +51,11 @@ class IfStatement(Statement):
         return self.cond.file_name()
 
 class WhileStatement(Statement):
-    def __init__(self, cond: Expression, while_body: Body, else_body: Body) -> None:
+    def __init__(self, cond: Expression, while_body: Body, hermph_body: Body) -> None:
         super().__init__()
         self.cond = cond
         self.while_body = while_body
-        self.else_body = else_body
+        self.hermph_body = hermph_body
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_whileloop(self)

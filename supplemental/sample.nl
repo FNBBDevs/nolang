@@ -20,7 +20,7 @@ if x == 'cum' # this is a comment
 
 	nolout('balls\tare\ngreat') # <-- comment here
 
-else
+hermph
 	no y = 69
 
 
@@ -31,7 +31,7 @@ else
 
 		  no z = 420
 		  nolout('wow ' + z + '!')
-	else
+	hermph
 		nolout('oh no!')
 	  	x
 
@@ -44,5 +44,5 @@ while x < 100
 	nolout(x + ' balls in my mouth!')
 	x = x + 1
 
-else
+hermph
 	nolout('Reached the end!!!')

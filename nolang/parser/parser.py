@@ -74,12 +74,12 @@ class Parser:
         elif_bodies = []
         else_body = None
 
-        while self._next_is(Tokens.ELIF):
+        while self._next_is(Tokens.ERM):
             elif_cond = self.expression()
             self._consume(Tokens.NEWLINE)
             elif_bodies.append(( elif_cond, self.body() ))
 
-        if self._next_is(Tokens.ELSE):
+        if self._next_is(Tokens.HERMPH):
             self._consume(Tokens.NEWLINE)
             else_body = self.body()
 
@@ -91,7 +91,7 @@ class Parser:
         while_body = self.body()
         else_body = None
 
-        if self._next_is(Tokens.ELSE):
+        if self._next_is(Tokens.HERMPH):
             self._consume(Tokens.NEWLINE)
             else_body = self.body()
 
