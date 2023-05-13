@@ -11,8 +11,8 @@ class Tokens(Enum):
     COMMA           = auto()
     NO              = auto()
     IF              = auto()
-    ELIF            = auto()
-    ELSE            = auto()
+    ERM            = auto()
+    HERMPH            = auto()
     PLUS            = auto()
     MINUS           = auto()
     STAR            = auto()
@@ -45,8 +45,8 @@ class Tokens(Enum):
 RESERVED_IDENTIFIERS = {
     'no': Tokens.NO,
     'if': Tokens.IF,
-    'elif': Tokens.ELIF,
-    'else': Tokens.ELSE,
+    'erm': Tokens.ERM,
+    'hermph': Tokens.HERMPH,
     'and': Tokens.AND,
     'or': Tokens.OR,
     'not': Tokens.NOT,
