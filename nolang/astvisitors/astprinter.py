@@ -18,9 +18,7 @@ class ASTPrinter(ASTVisitor):
 
     def explore(self, program: list[Statement]):
         self.node_counter = 0
-
         self.out.write('digraph {')
-
         prog_node = self._make_node('<prog>')
 
         prev_node = prog_node
@@ -30,8 +28,7 @@ class ASTPrinter(ASTVisitor):
             self._make_edge(stmt_node, stmt.visit(self))
             prev_node = stmt_node
 
-        self.out.write('}')
-        self.out.close()
+        self.out.write('}\n')
 
     def visit_vardecl(self, stmt: VarDeclaration):
         vardecl_node = self._make_node('<var_decl>')
