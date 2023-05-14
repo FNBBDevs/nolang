@@ -55,8 +55,8 @@ RESERVED_IDENTIFIERS = {
     'True': Tokens.TRUE,
     'False': Tokens.FALSE,
     'nol': Tokens.NOL,
-    "nolout": Tokens.NOLOUT,
-    "nolin": Tokens.NOLIN
+    'nolout': Tokens.NOLOUT,
+    'nolin': Tokens.NOLIN
 }
 
 class Token:
