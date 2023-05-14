@@ -21,9 +21,16 @@ def main():
     else:
         interactive()
 
+def read_line(prompt: str):
+    return input(prompt).rstrip()
+
 def interactive():
     while True:
-        line = input('>>> ')
+        line = read_line('>>> ')
+
+        while line.endswith('\\'):
+            line = f'{line[:-1]}\n{read_line("... ")}'
+
         exec_source(line, sys.stdin.name)
 
 def exec_file(file_name: str):
@@ -40,10 +47,7 @@ def exec_source(source: str, file_name: str):
 
     except* NolangException as eg:
         for e in eg.exceptions:
-            log_error(f'{type(e).__name__} "{e}"')
-
-def log_error(message: str):
-    print(f'nolang: {message}', file=sys.stderr)
+            print(f'{e}', file=sys.stderr)
 
 if __name__ == '__main__':
     try:

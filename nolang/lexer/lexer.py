@@ -156,6 +156,7 @@ class Lexer:
 
             case '"': self._process_string_literal('"')
             case "'": self._process_string_literal('\'')
+            case '\\': self._process_escape()
 
             case c:
                 if is_digit(c):
@@ -240,6 +241,16 @@ class Lexer:
             token_type = Tokens.IDENTIFIER
 
         self._gen_token(token_type, val)
+
+    def _process_escape(self) -> None:
+        while self._peek() == ' ' or self._peek() == '\t':
+            self._advance()
+
+        if self._next_is('\n'):
+            self.line += 1
+
+        else:
+            self._error(CharacterUnexpectedException('\\', self.line, self.file_name))
 
     ### Util ###
 
