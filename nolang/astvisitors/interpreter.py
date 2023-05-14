@@ -180,7 +180,7 @@ class Interpreter(ASTVisitor):
                 return val1 ** val2
 
         # This should never happen in a completed implementation, do it for debugging purposes
-        raise Exception(f'Failed to interpret signed expression: {expr}')
+        raise Exception(f'Failed to interpret expression: {expr}')
 
     def visit_unexpr(self, expr: UnaryExpression):
         val = expr.operand.visit(self)
@@ -197,7 +197,7 @@ class Interpreter(ASTVisitor):
                 return input(val)
 
         # This should never happen in a completed implementation, do it for debugging purposes
-        raise Exception(f'Failed to interpret signed expression: {expr}')
+        raise Exception(f'Failed to interpret expression: {expr}')
 
     def visit_literal(self, expr: Literal):
         return expr.value()
