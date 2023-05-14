@@ -50,6 +50,9 @@ class IfStatement(Statement):
     def file_name(self) -> str:
         return self.cond.file_name()
 
+    def has_hermph(self) -> bool:
+        return self.hermph_body is not None
+
 class WhileStatement(Statement):
     def __init__(self, cond: Expression, while_body: Body, hermph_body: Body) -> None:
         super().__init__()
@@ -62,6 +65,9 @@ class WhileStatement(Statement):
 
     def file_name(self) -> str:
         return self.cond.file_name()
+
+    def has_hermph(self) -> bool:
+        return self.hermph_body is not None
 
 class PrintStatement(Statement):
     def __init__(self, expr: Expression) -> None:

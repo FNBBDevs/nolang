@@ -7,14 +7,14 @@
 <prog> ::= ( <stmt> )* EOF .
 
 # Statements
-<stmt> ::= ( <decl_stmt> | <cpmd_stmt> ) .
+<stmt> ::= ( <decl_stmt> | <cmpd_stmt> ) .
 
 # Declaration statements
 <decl_stmt> ::= <var_decl> NEWLINE
 <var_decl> ::= "no" IDENTIFIER ( "=" <expr> )?
 
 # Compound statements
-<cpmd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <std_stmt> ) .
+<cmpd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <std_stmt> ) .
 <if_stmt> ::= "if" <expr> NEWLINE <body> ( "erm" <expr> NEWLINE <body> )* ( "hermph" NEWLINE <body> )? .
 <while_loop> ::= "while" <expr> NEWLINE <body> ( "hermph" NEWLINE <body> )? .
 <for_loop> ::= "for" IDENTIFIER "in" <expr> NEWLINE <body>

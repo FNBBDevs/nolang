@@ -2,44 +2,49 @@ import sys
 
 from nolang.lexer.lexer import Lexer
 from nolang.parser.parser import Parser
+
+from nolang.astvisitors.astvisitor import ASTVisitor
 from nolang.astvisitors.interpreter import Interpreter
+from nolang.astvisitors.astprinter import ASTPrinter
 
 from nolang.exception import NolangException
 
 lex = Lexer()
 parser = Parser()
-visitor = Interpreter()
 
+# Usage: nolang [FILE] [OPTIONS]
 def main():
-    if len(sys.argv) > 2:
-        print(f'Usage: nolan [file]', file=sys.stderr)
-        exit(-1)
-
-    if len(sys.argv) == 2:
-        exec_file(sys.argv[1])
+    if '--ast' in sys.argv:
+        visitor = ASTPrinter(sys.stdout)
 
     else:
-        interactive()
+        visitor = Interpreter()
 
-def read_line(prompt: str):
-    return input(prompt).rstrip()
+    if len(sys.argv) >= 2 and sys.argv[1] != '--ast':
+        file(sys.argv[1], visitor)
 
-def interactive():
+    else:
+        interactive(visitor)
+
+def interactive(visitor: ASTVisitor):
+    def read_line(prompt: str):
+        return input(prompt).rstrip()
+
     while True:
         line = read_line('>>> ')
 
         while line.endswith('\\'):
             line = f'{line[:-1]}\n{read_line("... ")}'
 
-        exec_source(line, sys.stdin.name)
+        process(visitor, line, sys.stdin.name)
 
-def exec_file(file_name: str):
+def file(file_name: str, visitor: ASTVisitor):
     with open(file_name, 'r') as f:
         source: str = f.read()
 
-    exec_source(source, file_name)
+    process(visitor, source, file_name)
 
-def exec_source(source: str, file_name: str):
+def process(visitor: ASTVisitor, source: str, file_name: str):
     try:
         tokens = lex.scan(source, file_name)
         stmts = parser.parse(tokens, file_name)
@@ -52,5 +57,6 @@ def exec_source(source: str, file_name: str):
 if __name__ == '__main__':
     try:
         main()
+
     except KeyboardInterrupt:
         print('🤓', end='')

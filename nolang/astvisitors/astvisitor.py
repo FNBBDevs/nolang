@@ -23,7 +23,7 @@ class ASTVisitor:
     def visit_exprstmt(self, stmt: ExprStatement):
         raise NotImplementedError()
 
-    def visit_assign(self, stmt: AssignExpression):
+    def visit_assign(self, expr: AssignExpression):
         raise NotImplementedError()
 
     def visit_binexpr(self, expr: BinaryExpression):
