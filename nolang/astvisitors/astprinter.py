@@ -71,7 +71,7 @@ class ASTPrinter(ASTVisitor):
             self._make_edge(if_node, self._make_node('NEWLINE'))
             self._make_edge(if_node, self._create_body(body))
 
-        if stmt.hermph_body:
+        if stmt.has_hermph():
             self._make_edge(if_node, self._make_node(r'\"hermph\"'))
             self._make_edge(if_node, self._make_node('NEWLINE'))
             self._make_edge(if_node, self._create_body(stmt.hermph_body))
@@ -86,7 +86,7 @@ class ASTPrinter(ASTVisitor):
         self._make_edge(if_node, self._make_node('NEWLINE'))
         self._make_edge(if_node, self._create_body(stmt.while_body))
 
-        if stmt.hermph_body:
+        if stmt.has_hermph():
             self._make_edge(if_node, self._make_node(r'\"hermph\"'))
             self._make_edge(if_node, self._make_node('NEWLINE'))
             self._make_edge(if_node, self._create_body(stmt.hermph_body))
@@ -107,11 +107,11 @@ class ASTPrinter(ASTVisitor):
         self._make_edge(expr_node, stmt.expr.visit(self))
         return expr_node
 
-    def visit_assign(self, stmt: AssignExpression):
+    def visit_assign(self, expr: AssignExpression):
         assign_node = self._make_node('<assign_expr>')
-        self._make_edge(assign_node, self._make_node(f'\\"{stmt.id}\\"'))
+        self._make_edge(assign_node, self._make_node(f'\\"{expr.id}\\"'))
         self._make_edge(assign_node, self._make_node(r'\"=\"'))
-        self._make_edge(assign_node, stmt.new.visit(self))
+        self._make_edge(assign_node, expr.assign.visit(self))
         return assign_node
 
     def visit_binexpr(self, expr: BinaryExpression):

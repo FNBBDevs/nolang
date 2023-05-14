@@ -52,10 +52,10 @@ class UnaryExpression(Expression):
         return f'{self.op} {self.operand}'
 
 class AssignExpression(Expression):
-    def __init__(self, id: Token, new: Expression) -> None:
+    def __init__(self, id: Token, assign: Expression) -> None:
         super().__init__()
         self.id = id
-        self.new = new
+        self.assign = assign
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_assign(self)
@@ -64,7 +64,7 @@ class AssignExpression(Expression):
         return self.id.file_name
 
     def __repr__(self) -> str:
-        return f'{self.id} = {self.new}'
+        return f'{self.id} = {self.assign}'
 
 class Literal(Expression):
     """Immediate value in the domain of the parser"""
