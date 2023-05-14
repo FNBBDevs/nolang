@@ -183,10 +183,9 @@ class Lexer:
             # Multiline string
             if next_char == '\n':
                 self.line += 1
-                continue
 
             # Encountered an escape sequence
-            if next_char == '\\':
+            elif next_char == '\\':
                 match self._advance():
                     case '\\': next_char = '\\'
                     case '"':  next_char = '"'
