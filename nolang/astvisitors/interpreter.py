@@ -67,6 +67,7 @@ class Interpreter(ASTVisitor):
 
         self.environment.values['nolout'] = Nolout()
         self.environment.values['nolin'] = Nolin()
+        self.environment.values['time'] = Time()
 
     def explore(self, program: list[Statement]):
         try:

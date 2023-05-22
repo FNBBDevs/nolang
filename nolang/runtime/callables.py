@@ -1,7 +1,5 @@
 
 from ..parser.expressions import Expression
-from ..parser.expressions import Expression
-
 from ..util import stringify
 
 class Interpreter: pass
@@ -18,7 +16,7 @@ class Nolout(NolangCallable):
         return 1
 
     def __call__(self, _, args: list[Expression]):
-        return print(stringify(args[0]))
+        print(stringify(args[0]))
 
 class Nolin(NolangCallable):
     def arity(self) -> int:
@@ -26,3 +24,12 @@ class Nolin(NolangCallable):
 
     def __call__(self, _, args: list[Expression]):
         return input(stringify(args[0]))
+
+import time
+
+class Time(NolangCallable):
+    def arity(self) -> int:
+        return 0
+
+    def __call__(self, *_):
+        return int(round(time.time() * 1000))
