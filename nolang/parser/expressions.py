@@ -66,6 +66,22 @@ class AssignExpression(Expression):
     def __repr__(self) -> str:
         return f'{self.id} = {self.assign}'
 
+class CallExpression(Expression):
+    def __init__(self, callee: Expression, paren: Token, args: list[Expression]) -> None:
+        super().__init__()
+        self.callee = callee
+        self.args = args
+        self.paren = paren
+
+    def visit(self, visitor: ASTVisitor):
+        return visitor.visit_call(self)
+
+    def file_name(self) -> str:
+        return self.callee.file_name()
+
+    def __repr__(self) -> str:
+        return f'{self.callee}({self.args})'
+
 class Literal(Expression):
     """Immediate value in the domain of the parser"""
 

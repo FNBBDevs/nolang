@@ -4,8 +4,8 @@ from ..parser.expressions import *
 from ..parser.statements import *
 from ..lexer.token import Tokens
 
+from ..runtime.callables import *
 from ..exception import *
-from ..util import stringify
 
 class Environment: pass
 class Environment:
@@ -65,6 +65,9 @@ class Interpreter(ASTVisitor):
     def __init__(self):
         self.environment = Environment()
 
+        self.environment.values['nolout'] = Nolout()
+        self.environment.values['nolin'] = Nolin()
+
     def explore(self, program: list[Statement]):
         try:
             for stmt in program:
@@ -106,10 +109,6 @@ class Interpreter(ASTVisitor):
             if stmt.has_hermph():
                 self._execute_body(stmt.hermph_body)
 
-    def visit_printstmt(self, stmt: PrintStatement):
-        val = stmt.expr.visit(self)
-        print(stringify(val))
-
     def visit_exprstmt(self, stmt: ExprStatement):
         stmt.expr.visit(self)
 
@@ -117,6 +116,24 @@ class Interpreter(ASTVisitor):
         val = expr.assign.visit(self)
         self.environment.assign(expr.id, val)
         return val
+
+    def visit_call(self, expr: CallExpression):
+        callee = expr.callee.visit(self)
+
+        # Static initialization of arguments
+        args = [ arg.visit(self) for arg in expr.args ]
+
+        if not self._is_type(callee, NolangCallable):
+            raise NotCallableException(expr.callee, expr.paren.line, expr.file_name())
+
+        callee: NolangCallable
+        arity = callee.arity()
+        given = len(args)
+
+        if arity != given:
+            raise InvalidArgumentsException(expr.callee, arity, given, expr.paren.line, expr.file_name())
+
+        return callee(self, args)
 
     def visit_binexpr(self, expr: BinaryExpression):
         val1 = expr.left.visit(self)
@@ -193,8 +210,6 @@ class Interpreter(ASTVisitor):
             case Tokens.PLUS:
                 self._check_numeric(val, expr.op)
                 return +val
-            case Tokens.NOLIN:
-                return input(val)
 
         # This should never happen in a completed implementation, do it for debugging purposes
         raise Exception(f'Failed to interpret expression: {expr}')
@@ -225,7 +240,7 @@ class Interpreter(ASTVisitor):
     @staticmethod
     def _is_type(val, *types: type):
         for t in types:
-            if type(val) is t:
+            if isinstance(val, t):
                 return True
 
         return False

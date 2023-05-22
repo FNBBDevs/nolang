@@ -93,15 +93,6 @@ class ASTPrinter(ASTVisitor):
 
         return if_node
 
-    def visit_printstmt(self, stmt: PrintStatement):
-        print_node = self._make_node('<print_stmt>')
-        self._make_edge(print_node, self._make_node(r'\"nolout\"'))
-        self._make_edge(print_node, self._make_node(r'\"(\"'))
-        self._make_edge(print_node, stmt.expr.visit(self))
-        self._make_edge(print_node, self._make_node(r'\")\"'))
-
-        return print_node
-
     def visit_exprstmt(self, stmt: ExprStatement):
         expr_node = self._make_node('<expr_stmt>')
         self._make_edge(expr_node, stmt.expr.visit(self))
@@ -114,6 +105,20 @@ class ASTPrinter(ASTVisitor):
         self._make_edge(assign_node, expr.assign.visit(self))
         return assign_node
 
+    def visit_call(self, expr: CallExpression):
+        call_node = self._make_node('<call_expr>')
+        self._make_edge(call_node, expr.callee.visit(self))
+        self._make_edge(call_node, self._make_node(r'\"(\"'))
+
+        if len(expr.args) > 0:
+            self._make_edge(call_node, expr.args[0].visit(self))
+            for i in range(1, len(expr.args)):
+                self._make_edge(call_node, self._make_node(r'\",\"'))
+                self._make_edge(call_node, expr.args[i].visit(self))
+
+        self._make_edge(call_node, self._make_node(r'\")\"'))
+        return call_node
+
     def visit_binexpr(self, expr: BinaryExpression):
         expr_node = self._make_node(self._binexpr_name(expr))
         self._make_edge(expr_node, expr.left.visit(self))
@@ -123,17 +128,8 @@ class ASTPrinter(ASTVisitor):
 
     def visit_unexpr(self, expr: UnaryExpression):
         expr_node = self._make_node(self._unexpr_name(expr))
-
-        if expr.op.type_id == Tokens.NOLIN: # Input is special case
-            self._make_edge(expr_node, self._make_node(r'\"nolin\"'))
-            self._make_edge(expr_node, self._make_node(r'\"(\"'))
-            self._make_edge(expr_node, expr.operand.visit(self))
-            self._make_edge(expr_node, self._make_node(r'\")\"'))
-
-        else:
-            self._make_edge(expr_node, self._make_node(f'\\"{expr.op}\\"'))
-            self._make_edge(expr_node, expr.operand.visit(self))
-
+        self._make_edge(expr_node, self._make_node(f'\\"{expr.op}\\"'))
+        self._make_edge(expr_node, expr.operand.visit(self))
         return expr_node
 
     def visit_literal(self, expr: Literal):
@@ -187,5 +183,4 @@ class ASTPrinter(ASTVisitor):
             case Tokens.NOT: return '<not_expr>'
             case Tokens.MINUS: return '<sign_expr>'
             case Tokens.PLUS: return '<sign_expr>'
-            case Tokens.NOLIN: return '<input_expr>'
             case _: raise Exception(f'Unknown expression: {expr}')

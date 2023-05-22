@@ -6,6 +6,8 @@ from .statements import *
 
 from ..exception import *
 
+MAX_PARAMETERS = 255
+
 class Parser:
     def parse(self, tokens: list[Token], filename: str) -> list[Statement]:
         self.tokens = tokens
@@ -23,19 +25,6 @@ class Parser:
             raise ExceptionGroup('Parser exceptions', self.exceptions)
 
         return statements
-
-    def body(self) -> Body:
-        stmts: list[Statement] = []
-
-        self._consume(Tokens.INDENT)
-
-        # We require atleast one statement
-        stmts.append(self.statement())
-
-        while not self._at_end() and not self._next_is(Tokens.DEDENT):
-            stmts.append(self.statement())
-
-        return Body(stmts)
 
     def statement(self) -> Statement:
         try:
@@ -70,48 +59,37 @@ class Parser:
     def if_stmt(self) -> Statement:
         cond = self.expression()
         self._consume(Tokens.NEWLINE)
-        if_body = self.body()
+        if_body = self._body()
         elif_bodies = []
         else_body = None
 
         while self._next_is(Tokens.ERM):
             elif_cond = self.expression()
             self._consume(Tokens.NEWLINE)
-            elif_bodies.append(( elif_cond, self.body() ))
+            elif_bodies.append(( elif_cond, self._body() ))
 
         if self._next_is(Tokens.HERMPH):
             self._consume(Tokens.NEWLINE)
-            else_body = self.body()
+            else_body = self._body()
 
         return IfStatement(cond, if_body, elif_bodies, else_body)
 
     def while_loop(self) -> Statement:
         cond = self.expression()
         self._consume(Tokens.NEWLINE)
-        while_body = self.body()
+        while_body = self._body()
         else_body = None
 
         if self._next_is(Tokens.HERMPH):
             self._consume(Tokens.NEWLINE)
-            else_body = self.body()
+            else_body = self._body()
 
         return WhileStatement(cond, while_body, else_body)
 
     def std_stmt(self) -> Statement:
-        if self._next_is(Tokens.NOLOUT):
-            stmt = self.print_stmt()
-        else:
-            stmt = self.expr_stmt()
-
+        stmt = self.expr_stmt()
         self._consume(Tokens.NEWLINE)
         return stmt
-
-    def print_stmt(self) -> Statement:
-        self._consume(Tokens.L_PARENTHESIS)
-        expr = self.expression()
-        self._consume(Tokens.R_PARENTHESIS)
-
-        return PrintStatement(expr)
 
     def expr_stmt(self) -> Expression:
         return ExprStatement(self.expression())
@@ -212,7 +190,7 @@ class Parser:
         return self.exp_expr()
 
     def exp_expr(self) -> Expression:
-        expr: Expression = self.input_expr()
+        expr: Expression = self.call_expr()
 
         if self._next_is(Tokens.EXP):
             op: Token = self._previous()
@@ -221,15 +199,13 @@ class Parser:
 
         return expr
 
-    def input_expr(self) -> Expression:
-        if self._next_is(Tokens.NOLIN):
-            token: Token = self._previous()
-            self._consume(Tokens.L_PARENTHESIS)
-            expr = self.expression()
-            self._consume(Tokens.R_PARENTHESIS)
-            return UnaryExpression(expr, token)
+    def call_expr(self) -> Expression:
+        expr: Expression = self.factor()
 
-        return self.factor()
+        while self._next_is(Tokens.L_PARENTHESIS):
+            expr = self._finish_call(expr)
+
+        return expr
 
     def factor(self) -> Expression:
         if self._next_is(
@@ -249,6 +225,40 @@ class Parser:
         self._consume(Tokens.R_PARENTHESIS)
 
         return expr
+
+    ### Helpers ###
+
+    def _body(self) -> Body:
+        stmts: list[Statement] = []
+
+        self._consume(Tokens.INDENT)
+
+        # We require atleast one statement
+        stmts.append(self.statement())
+
+        while not self._at_end() and not self._next_is(Tokens.DEDENT):
+            stmts.append(self.statement())
+
+        return Body(stmts)
+
+    def _finish_call(self, callee: Expression) -> CallExpression:
+        args: list[Expression] = []
+
+        if self._peek().type_id != Tokens.R_PARENTHESIS:
+            args.append(self.expression())
+
+            while self._next_is(Tokens.COMMA):
+                token = self._previous()
+                expr = self.expression()
+
+                if len(args) > MAX_PARAMETERS:
+                    self.exceptions.append(SyntaxError(token.line, token.file_name, message=f'Too many arguments for function call, MAX: {MAX_PARAMETERS}!'))
+                    continue
+
+                args.append(expr)
+
+        paren = self._consume(Tokens.R_PARENTHESIS)
+        return CallExpression(callee, paren, args)
 
     ### Utilities ###
 

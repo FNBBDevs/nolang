@@ -17,13 +17,13 @@ class ASTVisitor:
     def visit_whileloop(self, stmt: WhileStatement):
         raise NotImplementedError()
 
-    def visit_printstmt(self, stmt: PrintStatement):
-        raise NotImplementedError()
-
     def visit_exprstmt(self, stmt: ExprStatement):
         raise NotImplementedError()
 
     def visit_assign(self, expr: AssignExpression):
+        raise NotImplementedError()
+
+    def visit_call(self, expr: CallExpression):
         raise NotImplementedError()
 
     def visit_binexpr(self, expr: BinaryExpression):

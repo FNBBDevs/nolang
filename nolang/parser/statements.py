@@ -69,17 +69,6 @@ class WhileStatement(Statement):
     def has_hermph(self) -> bool:
         return self.hermph_body is not None
 
-class PrintStatement(Statement):
-    def __init__(self, expr: Expression) -> None:
-        super().__init__()
-        self.expr = expr
-
-    def visit(self, visitor: ASTVisitor):
-        return visitor.visit_printstmt(self)
-
-    def file_name(self) -> str:
-        return self.expr.file_name()
-
 class ExprStatement(Statement):
     """Statement that may cause a side-effect and evaluate"""
 

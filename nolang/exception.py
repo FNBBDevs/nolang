@@ -21,11 +21,12 @@ class NolangException(Exception):
 # Compile-time Exceptions
 
 class SyntaxError(NolangException):
-    def __init__(self, *args: object) -> None:
+    def __init__(self, *args: object, message: str = 'Syntax error') -> None:
         super().__init__(*args)
+        self.message = message
 
     def __str__(self) -> str:
-        return f'Syntax error in {self._loc_to_str()}'
+        return f'{self.message} in {self._loc_to_str()}'
 
 class CharacterUnexpectedException(SyntaxError):
     def __init__(self, char: str, *args: object) -> None:
@@ -134,3 +135,21 @@ class VariableNotDefinedException(RuntimeException):
 
     def __str__(self) -> str:
         return f'{self.name} has not been defined in this scope {self._loc_to_str()}'
+
+class NotCallableException(RuntimeException):
+    def __init__(self, callee: Expression, *args: object) -> None:
+        super().__init__(*args)
+        self.callee = callee
+
+    def __str__(self) -> str:
+        return f'{self.callee} is not a callable object {self._loc_to_str()}'
+
+class InvalidArgumentsException(RuntimeException):
+    def __init__(self, callee: Expression, arity: int, given: int, *args: object) -> None:
+        super().__init__(*args)
+        self.callee = callee
+        self.arity = arity
+        self.given = given
+
+    def __str__(self) -> str:
+        return f'{self.callee} requires {self.arity} arguments but {self.given} were provided {self._loc_to_str()}'
