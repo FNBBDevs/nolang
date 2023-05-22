@@ -5,10 +5,14 @@ greg foo()
 greg add(x, y)
     nolout(x + ' + ' + y + ' = ' + (x + y))
 
-
+greg count(n)
+    if n > 0
+        nolout(n)
+        count(n - 1)
 
 foo()
 add(9, 10)
+count(10)
 
 # z # Should not exist
 
@@ -18,4 +22,4 @@ greg bar()
 
 # z # Should not exist
 bar()
-z # Should not exist
+# z # Should not exist

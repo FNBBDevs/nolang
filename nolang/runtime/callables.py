@@ -25,7 +25,7 @@ class NolangFunction(NolangCallable):
 
     def __call__(self, interpreter: Interpreter, args: list[Expression]):
         from ..astvisitors.interpreter import Environment
-        env = Environment(interpreter.environment)
+        env = Environment(interpreter.globals)
 
         # Binding arguments to parameters
         for param, arg in zip(self.fun.params, args):
