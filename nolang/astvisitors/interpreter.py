@@ -63,12 +63,14 @@ class Environment:
 
 class Interpreter(ASTVisitor):
     def __init__(self):
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = self.globals
 
-        self.environment.values['nolout'] = Nolout()
-        self.environment.values['nolin'] = Nolin()
-        self.environment.values['time'] = Time()
-        self.environment.values['random'] = Random()
+        # Initialize runtime library
+        self.globals.values['nolout'] = Nolout()
+        self.globals.values['nolin'] = Nolin()
+        self.globals.values['time'] = Time()
+        self.globals.values['random'] = Random()
 
     def explore(self, program: list[Statement]):
         try:
