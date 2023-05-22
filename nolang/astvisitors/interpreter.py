@@ -68,6 +68,7 @@ class Interpreter(ASTVisitor):
         self.environment.values['nolout'] = Nolout()
         self.environment.values['nolin'] = Nolin()
         self.environment.values['time'] = Time()
+        self.environment.values['random'] = Random()
 
     def explore(self, program: list[Statement]):
         try:
