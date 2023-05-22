@@ -11,6 +11,9 @@ class ASTVisitor:
     def visit_vardecl(self, stmt: VarDeclaration):
         raise NotImplementedError()
 
+    def visit_fundecl(self, stmt: FunDeclaration):
+        raise NotImplementedError()
+
     def visit_ifstmt(self, stmt: IfStatement):
         raise NotImplementedError()
 

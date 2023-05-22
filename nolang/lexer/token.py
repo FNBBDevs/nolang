@@ -10,9 +10,10 @@ class Tokens(Enum):
     R_PARENTHESIS   = auto()
     COMMA           = auto()
     NO              = auto()
+    GREG            = auto()
     IF              = auto()
-    ERM            = auto()
-    HERMPH            = auto()
+    ERM             = auto()
+    HERMPH          = auto()
     PLUS            = auto()
     MINUS           = auto()
     STAR            = auto()
@@ -42,6 +43,7 @@ class Tokens(Enum):
 
 RESERVED_IDENTIFIERS = {
     'no': Tokens.NO,
+    'greg': Tokens.GREG,
     'if': Tokens.IF,
     'erm': Tokens.ERM,
     'hermph': Tokens.HERMPH,

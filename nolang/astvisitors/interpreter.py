@@ -88,6 +88,10 @@ class Interpreter(ASTVisitor):
 
         self.environment.define(stmt.id, val)
 
+    def visit_fundecl(self, stmt: FunDeclaration):
+        fun = NolangFunction(stmt)
+        self.environment.define(stmt.id, fun)
+
     def visit_ifstmt(self, stmt: IfStatement):
         cond = stmt.cond.visit(self)
         if self._to_truthy(cond):
@@ -223,11 +227,11 @@ class Interpreter(ASTVisitor):
 
     # Utilities
 
-    def _execute_body(self, body: Body):
+    def _execute_body(self, body: Body, new_env: Environment = None):
         previous_env = self.environment
 
         # Create a new environment
-        self.environment = Environment(previous_env)
+        self.environment = Environment(previous_env) if new_env is None else new_env
 
         try:
             # Execute all the statements

@@ -10,14 +10,16 @@
 <stmt> ::= ( <decl_stmt> | <cmpd_stmt> ) .
 
 # Declaration statements
-<decl_stmt> ::= <var_decl> NEWLINE
+<decl_stmt> ::= ( <var_decl> | <fun_decl> ) NEWLINE
 <var_decl> ::= "no" IDENTIFIER ( "=" <expr> )?
+<fun_decl> ::= "greg" IDENTIFIER "(" ( <params> )? ")" NEWLINE <body> .
+<params> ::= IDENTIFIER ( "," IDENTIFIER )* .
 
 # Compound statements
 <cmpd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <std_stmt> ) .
 <if_stmt> ::= "if" <expr> NEWLINE <body> ( "erm" <expr> NEWLINE <body> )* ( "hermph" NEWLINE <body> )? .
 <while_loop> ::= "while" <expr> NEWLINE <body> ( "hermph" NEWLINE <body> )? .
-<for_loop> ::= "for" IDENTIFIER "in" <expr> NEWLINE <body>
+# <for_loop> ::= "for" IDENTIFIER "in" <expr> NEWLINE <body> ( "hermph" NEWLINE <body> )? .
 
 # Standard statements
 <std_stmt> ::= <expr_stmt> NEWLINE .
@@ -39,7 +41,6 @@
 # exponentiation     **               highest
 
 <expr> ::= <assign_expr> .
-<args> ::= <expr> ( "," <expr> )* .
 
 <assign_expr> ::= IDENTIFIER "=" <assign_expr> | <or_expr> .
 
@@ -56,6 +57,7 @@
 <exp_expr> ::= <call_expr> ( "**" <sign_expr> )? .
 
 <call_expr> ::= <factor> ( "(" ( <args> )? ")" )* .
+<args> ::= <expr> ( "," <expr> )* .
 
 <factor> ::= INT_LITERAL
            | FLOAT_LITERAL

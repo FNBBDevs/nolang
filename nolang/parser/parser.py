@@ -31,6 +31,9 @@ class Parser:
             if self._next_is(Tokens.NO):
                 stmt = self.var_decl()
 
+            elif self._next_is(Tokens.GREG):
+                stmt = self.fun_decl()
+
             else:
                 stmt = self.cmpd_stmt()
 
@@ -50,10 +53,30 @@ class Parser:
         self._consume(Tokens.NEWLINE)
         return VarDeclaration(id, init)
 
+    def fun_decl(self) -> Statement:
+        id = self._consume(Tokens.IDENTIFIER)
+        self._consume(Tokens.L_PARENTHESIS)
+
+        params: list[Token] = []
+        if self._peek().type_id != Tokens.R_PARENTHESIS:
+            params.append(self._consume(Tokens.IDENTIFIER))
+
+            while self._next_is(Tokens.COMMA):
+                token = self._consume(Tokens.IDENTIFIER)
+
+                if len(params) > MAX_PARAMETERS:
+                    self.exceptions.append(SyntaxError(token.line, token.file_name, message=f'Too many parameters for function, MAX: {MAX_PARAMETERS}!'))
+                    continue
+
+                params.append(token)
+
+        self._consume(Tokens.R_PARENTHESIS)
+        self._consume(Tokens.NEWLINE)
+        return FunDeclaration(id, params, self._body())
+
     def cmpd_stmt(self) -> Statement:
         if self._next_is(Tokens.IF): return self.if_stmt()
         if self._next_is(Tokens.WHILE): return self.while_loop()
-
         return self.std_stmt()
 
     def if_stmt(self) -> Statement:

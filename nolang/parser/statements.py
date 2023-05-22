@@ -36,6 +36,19 @@ class VarDeclaration(Statement):
     def has_initializer(self) -> bool:
         return self.init is not None
 
+class FunDeclaration(Statement):
+    def __init__(self, id: Token, params: list[Token], body: Body) -> None:
+        super().__init__()
+        self.id = id
+        self.params = params
+        self.body = body
+
+    def visit(self, visitor: ASTVisitor):
+        return visitor.visit_fundecl(self)
+
+    def file_name(self) -> str:
+        return self.id.file_name
+
 class IfStatement(Statement):
     def __init__(self, cond: Expression, if_body: Body, erm_bodies: list[tuple[Expression, Body]], hermph_body: Body) -> None:
         super().__init__()
