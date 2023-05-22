@@ -14,10 +14,11 @@
 <var_decl> ::= "no" IDENTIFIER ( "=" <expr> )?
 
 # Compound statements
-<cmpd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <std_stmt> ) .
+<cmpd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <bounce_loop> | <std_stmt> ) .
 <if_stmt> ::= "if" <expr> NEWLINE <body> ( "erm" <expr> NEWLINE <body> )* ( "hermph" NEWLINE <body> )? .
 <while_loop> ::= "while" <expr> NEWLINE <body> ( "hermph" NEWLINE <body> )? .
 <for_loop> ::= "for" IDENTIFIER "in" <expr> NEWLINE <body>
+<bounce_loop> ::= "bounce" NEWLINE <body> "while" <expr> NEWLINE
 
 # Standard statements
 <std_stmt> ::= ( <print_stmt> | <expr_stmt> ) NEWLINE .

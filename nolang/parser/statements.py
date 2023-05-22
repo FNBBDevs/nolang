@@ -69,6 +69,18 @@ class WhileStatement(Statement):
     def has_hermph(self) -> bool:
         return self.hermph_body is not None
 
+class BounceStatement(Statement):
+    def __init__(self, bounce_body: Body, cond: Expression) -> None:
+        super().__init__()
+        self.cond = cond
+        self.bounce_body = bounce_body
+
+    def visit(self, visitor: ASTVisitor):
+        return visitor.visit_bounceloop(self)
+
+    def file_name(self) -> str:
+        return self.cond.file_name()
+
 class PrintStatement(Statement):
     def __init__(self, expr: Expression) -> None:
         super().__init__()
