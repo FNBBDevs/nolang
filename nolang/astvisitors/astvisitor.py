@@ -23,6 +23,9 @@ class ASTVisitor:
     def visit_exprstmt(self, stmt: ExprStatement):
         raise NotImplementedError()
 
+    def visit_return(self, stmt: ReturnStatement):
+        raise NotImplementedError()
+
     def visit_assign(self, expr: AssignExpression):
         raise NotImplementedError()
 

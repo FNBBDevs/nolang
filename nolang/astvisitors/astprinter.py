@@ -98,6 +98,15 @@ class ASTPrinter(ASTVisitor):
         self._make_edge(expr_node, stmt.expr.visit(self))
         return expr_node
 
+    def visit_return(self, stmt: ReturnStatement):
+        return_node = self._make_node('<return_stmt>')
+        self._make_edge(return_node, self._make_node(r'\"pay\"'))
+
+        if stmt.has_value():
+            self._make_edge(return_node, stmt.value.visit(self))
+
+        return return_node
+
     def visit_assign(self, expr: AssignExpression):
         assign_node = self._make_node('<assign_expr>')
         self._make_edge(assign_node, self._make_node(f'\\"{expr.id}\\"'))

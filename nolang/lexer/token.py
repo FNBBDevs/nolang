@@ -40,6 +40,7 @@ class Tokens(Enum):
     IDENTIFIER      = auto()
     NOL             = auto()
     NEWLINE         = auto()
+    RETURN          = auto()
 
 RESERVED_IDENTIFIERS = {
     'no': Tokens.NO,
@@ -54,7 +55,8 @@ RESERVED_IDENTIFIERS = {
     'for': Tokens.FOR,
     'True': Tokens.TRUE,
     'False': Tokens.FALSE,
-    'nol': Tokens.NOL
+    'nol': Tokens.NOL,
+    "pay": Tokens.RETURN
 }
 
 class Token:

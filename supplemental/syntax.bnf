@@ -22,8 +22,9 @@
 # <for_loop> ::= "for" IDENTIFIER "in" <expr> NEWLINE <body> ( "hermph" NEWLINE <body> )? .
 
 # Standard statements
-<std_stmt> ::= <expr_stmt> NEWLINE .
-<expr_stmt> ::= <expr>
+<std_stmt> ::= ( <return_stmt> | <expr_stmt> ) NEWLINE .
+<return_stmt> ::= "pay" ( <expr> )? .
+<expr_stmt> ::= <expr> .
 
 <body> ::= INDENT ( <stmt> )+ DEDENT
 
