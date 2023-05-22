@@ -1,6 +1,7 @@
 
 from ..parser.expressions import *
 from ..parser.statements import *
+from ..exception import *
 from ..util import stringify
 
 import time
@@ -30,7 +31,11 @@ class NolangFunction(NolangCallable):
         for param, arg in zip(self.fun.params, args):
             env.define(param, arg)
 
-        interpreter._execute_body(self.fun.body, env)
+        try:
+            interpreter._execute_body(self.fun.body, env)
+
+        except Return as ret:
+            return ret.value
 
 class Nolout(NolangCallable):
     def arity(self) -> int:
@@ -52,10 +57,10 @@ class Time(NolangCallable):
 
     def __call__(self, *_):
         return int(round(time.time() * 1000))
-    
+
 class Random(NolangCallable):
     def arity(self) -> int:
         return 0
-     
+
     def __call__(self, *_):
         return random.random()

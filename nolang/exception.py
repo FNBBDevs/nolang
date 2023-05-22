@@ -81,6 +81,10 @@ class InvalidBindingException(SyntaxError):
     def __str__(self) -> str:
         return f'Cannot bind to non-lvalue expression \'{self.expr}\' {self._loc_to_str()}'
 
+class UnexpectedReturnException(SyntaxError):
+    def __str__(self) -> str:
+        return f'\'pay\' must be in function body {self._loc_to_str()}'
+
 # Runtime Exceptions
 
 class RuntimeException(NolangException):
@@ -153,3 +157,9 @@ class InvalidArgumentsException(RuntimeException):
 
     def __str__(self) -> str:
         return f'{self.callee} requires {self.arity} arguments but {self.given} were provided {self._loc_to_str()}'
+
+# Non-exceptional exceptions
+
+class Return(Exception):
+    def __init__(self, value) -> None:
+        self.value = value

@@ -78,10 +78,6 @@ class Interpreter(ASTVisitor):
         except RuntimeException as e:
             raise e
 
-        # Catch python exceptions
-        except Exception as e:
-            raise RuntimeException(-1, stmt.file_name(), message = f'{repr(e)} - This is an internal error')
-
     def visit_vardecl(self, stmt: VarDeclaration):
         val = None
         if stmt.has_initializer():
@@ -117,6 +113,13 @@ class Interpreter(ASTVisitor):
 
     def visit_exprstmt(self, stmt: ExprStatement):
         stmt.expr.visit(self)
+
+    def visit_return(self, stmt: ReturnStatement):
+        value = None
+        if stmt.has_value():
+            value = stmt.value.visit(self)
+
+        raise Return(value)
 
     def visit_assign(self, expr: AssignExpression):
         val = expr.assign.visit(self)

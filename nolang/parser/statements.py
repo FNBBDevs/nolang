@@ -94,3 +94,17 @@ class ExprStatement(Statement):
 
     def file_name(self) -> str:
         return self.expr.file_name()
+
+class ReturnStatement(Statement):
+    def __init__(self, value: Expression) -> None:
+        super().__init__()
+        self.value = value
+
+    def visit(self, visitor: ASTVisitor):
+        return visitor.visit_return(self)
+
+    def file_name(self) -> str:
+        return self.value.file_name()
+
+    def has_value(self) -> bool:
+        return self.value is not None
