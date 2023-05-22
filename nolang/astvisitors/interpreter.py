@@ -113,6 +113,11 @@ class Interpreter(ASTVisitor):
             if stmt.has_hermph():
                 self._execute_body(stmt.hermph_body)
 
+    def visit_bounceloop(self, stmt: BounceStatement):
+        self._execute_body(stmt.bounce_body)
+        while self._to_truthy(stmt.cond.visit(self)):
+            self._execute_body(stmt.bounce_body)
+
     def visit_exprstmt(self, stmt: ExprStatement):
         stmt.expr.visit(self)
 

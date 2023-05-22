@@ -84,6 +84,8 @@ class Parser:
     def cmpd_stmt(self) -> Statement:
         if self._next_is(Tokens.IF): return self.if_stmt()
         if self._next_is(Tokens.WHILE): return self.while_loop()
+        if self._next_is(Tokens.BOUNCE): return self.bounce_loop()
+
         return self.std_stmt()
 
     def if_stmt(self) -> Statement:
@@ -115,6 +117,15 @@ class Parser:
             else_body = self._body()
 
         return WhileStatement(cond, while_body, else_body)
+
+    def bounce_loop(self) -> Statement:
+        self._consume(Tokens.NEWLINE)
+        bounce_body = self.body()
+        self._consume(Tokens.WHILE)
+        cond = self.expression()
+        self._consume(Tokens.NEWLINE)
+
+        return BounceStatement(bounce_body, cond)
 
     def std_stmt(self) -> Statement:
         if self._next_is(Tokens.RETURN):

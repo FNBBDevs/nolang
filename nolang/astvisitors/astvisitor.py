@@ -20,6 +20,9 @@ class ASTVisitor:
     def visit_whileloop(self, stmt: WhileStatement):
         raise NotImplementedError()
 
+    def visit_bounceloop(self, stmt: BounceStatement):
+        raise NotImplementedError()
+
     def visit_exprstmt(self, stmt: ExprStatement):
         raise NotImplementedError()
 

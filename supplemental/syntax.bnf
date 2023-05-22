@@ -16,9 +16,10 @@
 <params> ::= IDENTIFIER ( "," IDENTIFIER )* .
 
 # Compound statements
-<cmpd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <std_stmt> ) .
+<cmpd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <bounce_loop> | <std_stmt> ) .
 <if_stmt> ::= "if" <expr> NEWLINE <body> ( "erm" <expr> NEWLINE <body> )* ( "hermph" NEWLINE <body> )? .
 <while_loop> ::= "while" <expr> NEWLINE <body> ( "hermph" NEWLINE <body> )? .
+<bounce_loop> ::= "bounce" NEWLINE <body> "while" <expr> NEWLINE
 # <for_loop> ::= "for" IDENTIFIER "in" <expr> NEWLINE <body> ( "hermph" NEWLINE <body> )? .
 
 # Standard statements

@@ -166,5 +166,4 @@ cython_debug/
 # bat
 *.bat
 
-#my_samples
 my_samples/
