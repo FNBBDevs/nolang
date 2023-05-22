@@ -16,6 +16,9 @@ class NolangCallable:
     def __call__(self, interpreter: Interpreter, args: list[Expression]):
         raise NotImplementedError()
 
+    def __str__(self) -> str:
+        return f'<greg {self.__class__.__name__}>'
+
 class NolangFunction(NolangCallable):
     def __init__(self, fun: FunDeclaration) -> None:
         self.fun = fun
@@ -36,6 +39,9 @@ class NolangFunction(NolangCallable):
 
         except Return as ret:
             return ret.value
+
+    def __str__(self) -> str:
+        return f'<greg {self.fun.id}>'
 
 class Nolout(NolangCallable):
     def arity(self) -> int:

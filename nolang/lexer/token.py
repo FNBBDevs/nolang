@@ -56,7 +56,7 @@ RESERVED_IDENTIFIERS = {
     'True': Tokens.TRUE,
     'False': Tokens.FALSE,
     'nol': Tokens.NOL,
-    "pay": Tokens.RETURN
+    'pay': Tokens.RETURN
 }
 
 class Token:
