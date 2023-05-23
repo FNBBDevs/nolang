@@ -6,6 +6,7 @@ from ..util import stringify
 
 import time
 import random
+import math
 
 class Interpreter: pass
 
@@ -70,3 +71,45 @@ class Random(NolangCallable):
 
     def __call__(self, *_):
         return random.random()
+
+class Int(NolangCallable):
+    def arity(self) -> int:
+        return 1
+
+    def __call__(self, _, args: list[Expression]):
+        try:
+            return int(args[0])
+        except ValueError:
+            # klim, implement error, thanks, or I can later
+            return 420
+
+class Float(NolangCallable):
+    def arity(self) -> int:
+        return 1
+
+    def __call__(self, _, args: list[Expression]):
+        try:
+            return float(args[0])
+        except ValueError:
+            # klim, implement error, thanks, or I can later
+            return 420.0
+
+class RoundDown(NolangCallable):
+    def arity(self) -> int:
+        return 1
+
+    def __call__(self, _, args: list[Expression]):
+        try:
+            return int(args[0])
+        except ValueError:
+            return args[0]
+
+class RoundUp(NolangCallable):
+    def arity(self) -> int:
+        return 1
+
+    def __call__(self, _, args: list[Expression]):
+        try:
+            return int(math.ceil(args[0]))
+        except ValueError:
+            return args[0]
