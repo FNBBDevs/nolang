@@ -23,6 +23,7 @@ no z = 8
 foo3()
 
 no a = 9
+# no what = what # uhhh... yea you can't do this obviously
 
 greg foo4()
     no a = 10

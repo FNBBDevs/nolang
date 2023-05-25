@@ -20,15 +20,16 @@ class NolangCallable:
         return f'<greg {self.__class__.__name__}>'
 
 class NolangFunction(NolangCallable):
-    def __init__(self, fun: FunDeclaration) -> None:
+    def __init__(self, fun: FunDeclaration, env) -> None:
         self.fun = fun
+        self.env = env
 
     def arity(self) -> int:
         return len(self.fun.params)
 
     def __call__(self, interpreter: Interpreter, args: list[Expression]):
         from ..astvisitors.interpreter import Environment
-        env = Environment(interpreter.globals)
+        env = Environment(self.env)
 
         # Binding arguments to parameters
         for param, arg in zip(self.fun.params, args):

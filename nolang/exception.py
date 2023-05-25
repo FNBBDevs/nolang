@@ -18,7 +18,7 @@ class NolangException(Exception):
         """Returns a string representation indicating location in source where exception was called"""
         return f'\'{self.file_name}\':{self.line}'
 
-# Compile-time Exceptions
+# Syntax Exceptions
 
 class SyntaxError(NolangException):
     def __init__(self, *args: object, message: str = 'Syntax error') -> None:
@@ -85,6 +85,32 @@ class UnexpectedReturnException(SyntaxError):
     def __str__(self) -> str:
         return f'\'pay\' must be in function body {self._loc_to_str()}'
 
+# Semantic Exceptions
+
+class SemanticError(NolangException):
+    def __init__(self, *args: object, message: str = 'Semantic error') -> None:
+        super().__init__(*args)
+        self.message = message
+
+    def __str__(self) -> str:
+        return f'{self.message} in {self._loc_to_str()}'
+
+class UndefinedVariableUsage(SemanticError):
+    def __init__(self, name: str, *args: object) -> None:
+        super().__init__(*args)
+        self.name = name
+
+    def __str__(self) -> str:
+        return f'Using variable \'{self.name}\' before initialization {self._loc_to_str()}'
+
+class VariableRedefinitionException(SemanticError):
+    def __init__(self, name: str, *args: object) -> None:
+        super().__init__(*args)
+        self.name = name
+
+    def __str__(self) -> str:
+        return f'{self.name} has already been defined in this scope {self._loc_to_str()}'
+
 # Runtime Exceptions
 
 class RuntimeException(NolangException):
@@ -123,14 +149,6 @@ class DivideByZeroException(RuntimeException):
 
     def __str__(self) -> str:
         return f'Divide by zero {self._loc_to_str()}'
-
-class VariableRedefinitionException(RuntimeException):
-    def __init__(self, name: str, *args: object) -> None:
-        super().__init__(*args)
-        self.name = name
-
-    def __str__(self) -> str:
-        return f'{self.name} has already been defined in this scope {self._loc_to_str()}'
 
 class VariableNotDefinedException(RuntimeException):
     def __init__(self, name: str, *args: object) -> None:
