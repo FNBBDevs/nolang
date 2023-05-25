@@ -71,6 +71,10 @@ class Interpreter(ASTVisitor):
         self.globals.values['nolin'] = Nolin()
         self.globals.values['time'] = Time()
         self.globals.values['random'] = Random()
+        self.globals.values['int'] = Int()
+        self.globals.values['float'] = Float()
+        self.globals.values['roundup'] = RoundUp()
+        self.globals.values['rounddown'] = RoundDown()
 
         self.environment = self.globals
 
