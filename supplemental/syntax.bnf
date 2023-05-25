@@ -7,16 +7,25 @@
 <prog> ::= ( <stmt> )* EOF .
 
 # Statements
-<stmt> ::= ( <decl_stmt> | <cmpd_stmt> ) .
+<stmt> ::= <decl_stmt> .
 
 # Declaration statements
-<decl_stmt> ::= ( <var_decl> | <fun_decl> ) NEWLINE
-<var_decl> ::= "no" IDENTIFIER ( "=" <expr> )?
+<decl_stmt> ::=
+      <var_decl>
+    | <fun_decl>
+    | <cmpd_stmt> .
+
+<var_decl> ::= "no" IDENTIFIER ( "=" <expr> )? NEWLINE
 <fun_decl> ::= "greg" IDENTIFIER "(" ( <params> )? ")" NEWLINE <body> .
 <params> ::= IDENTIFIER ( "," IDENTIFIER )* .
 
 # Compound statements
-<cmpd_stmt> ::= ( <if_stmt> | <while_loop> | <for_loop> | <bounce_loop> | <std_stmt> ) .
+<cmpd_stmt> ::=
+      <if_stmt>
+    | <while_loop>
+    | <bounce_loop>
+    | <std_stmt> .
+
 <if_stmt> ::= "if" <expr> NEWLINE <body> ( "erm" <expr> NEWLINE <body> )* ( "hermph" NEWLINE <body> )? .
 <while_loop> ::= "while" <expr> NEWLINE <body> ( "hermph" NEWLINE <body> )? .
 <bounce_loop> ::= "bounce" NEWLINE <body> "while" <expr> NEWLINE
