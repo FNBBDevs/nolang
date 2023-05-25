@@ -1,6 +1,6 @@
 # <span><img src="https://i.ibb.co/T18gqfk/2.png" width="32px"></span> nolang
 
-That's Nolan-G, Nolan-Language, or No-Language. Take your pick they all work! This is the start of something truly revolutionary: a very python-like language written in python (so that it's *extra* slow ofcourse) without the python bull***t. Dedicated to [nulzo](https://github.com/nulzo) bouncin on ma member. Which is obviously a reference to my trampoline of course which is something you bounce on over the weekend. 
+That's Nolan-G, Nolan-Language, or No-Language. Take your pick they all work! This is the start of something truly revolutionary: a very python-like language written in python (so that it's *extra* slow of course) without the python bull***t. Dedicated to [nulzo](https://github.com/nulzo) bouncin on ma member. Which is obviously a reference to my trampoline of course which is something you bounce on over the weekend. 
 
 Ethan - personally, I think python is one of the faster programming languages!
 
