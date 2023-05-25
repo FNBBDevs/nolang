@@ -54,7 +54,7 @@ class Environment:
 
         self.values[name] = new_value
 
-    ### Utils ###
+    ### Utilities ###
 
     def _env_at(self, distance: int) -> Environment:
         environment = self
@@ -91,7 +91,10 @@ class Interpreter(ASTVisitor):
         self.environment.define(stmt.id, value)
 
     def visit_fundecl(self, stmt: FunDeclaration):
+        # We give the function the current environment when DECLARED.
+        # That way it can use variables outside of its scope
         fun = NolangFunction(stmt, self.environment)
+
         self.environment.define(stmt.id, fun)
 
     def visit_ifstmt(self, stmt: IfStatement):
@@ -135,9 +138,11 @@ class Interpreter(ASTVisitor):
         value = expr.assign.visit(self)
         distance = self.bindings.get(expr)
 
+        # We know which environment local variables are in
         if distance is not None:
             self.environment.assign_at(expr.id, value, distance)
 
+        # Distance is None, this might be a global variable
         else:
             self.globals.assign(expr.id, value)
 
@@ -246,9 +251,11 @@ class Interpreter(ASTVisitor):
     def visit_identifier(self, expr: Identifier):
         distance = self.bindings.get(expr)
 
+        # We know which environment local variables are in
         if distance is not None:
             return self.environment.get_at(expr.id, distance)
 
+        # Distance is None, this might be a global variable
         else:
             return self.globals.get(expr.id)
 

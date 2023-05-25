@@ -68,6 +68,7 @@ class Resolver(ASTVisitor):
         for param in stmt.params:
             self._define(param)
 
+        # We are entering a function body, increment the counter
         self.function_counter += 1
         for stmt in stmt.body.stmts:
             stmt.visit(self)
@@ -125,7 +126,7 @@ class Resolver(ASTVisitor):
         expr.operand.visit(self)
 
     def visit_literal(self, _):
-        return # Do nothing, literals are the end-of-the-line.
+        return # Do nothing, literals are end-of-the-line.
 
     def visit_identifier(self, expr: Identifier):
         scope = self.scopes[-1]
