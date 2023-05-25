@@ -1,49 +1,15 @@
 
-from ..parser.expressions import *
-from ..parser.statements import *
-from ..exception import *
-from ..util import stringify
+from .types.callables import NolangCallable
+from .parser.expressions import *
+from .parser.statements import *
+from .exception import *
 
+from .util import stringify
 import time
 import random
 import math
 
-class Interpreter: pass
-
-class NolangCallable:
-    def arity(self) -> int:
-        raise NotImplementedError()
-
-    def __call__(self, interpreter: Interpreter, args: list[Expression]):
-        raise NotImplementedError()
-
-    def __str__(self) -> str:
-        return f'<greg {self.__class__.__name__}>'
-
-class NolangFunction(NolangCallable):
-    def __init__(self, fun: FunDeclaration, env) -> None:
-        self.fun = fun
-        self.env = env
-
-    def arity(self) -> int:
-        return len(self.fun.params)
-
-    def __call__(self, interpreter: Interpreter, args: list[Expression]):
-        from ..astvisitors.interpreter import Environment
-        env = Environment(self.env)
-
-        # Binding arguments to parameters
-        for param, arg in zip(self.fun.params, args):
-            env.define(param, arg)
-
-        try:
-            interpreter._execute_body(self.fun.body, env)
-
-        except Return as ret:
-            return ret.value
-
-    def __str__(self) -> str:
-        return f'<greg {self.fun.id}>'
+# Implementations of runtime library objects
 
 class Nolout(NolangCallable):
     def arity(self) -> int:
@@ -114,3 +80,17 @@ class RoundUp(NolangCallable):
             return int(math.ceil(args[0]))
         except ValueError:
             return args[0]
+
+# Global runtime, this should be immutable!
+
+RUNTIME_GLOBALS: dict[str, NolangCallable] = \
+{
+    'nolout':    Nolout(),
+    'nolin':     Nolin(),
+    'time':      Time(),
+    'random':    Random(),
+    'int':       Int(),
+    'float':     Float(),
+    'roundup':   RoundUp(),
+    'rounddown': RoundDown(),
+}

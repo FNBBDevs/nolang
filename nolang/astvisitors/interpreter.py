@@ -4,9 +4,10 @@ from .resolver import Resolver
 
 from ..parser.expressions import *
 from ..parser.statements import *
+from ..types.callables import *
 from ..lexer.token import Tokens
 
-from ..runtime.callables import *
+from ..runtime import RUNTIME_GLOBALS
 from ..exception import *
 
 class Environment: pass
@@ -66,15 +67,8 @@ class Interpreter(ASTVisitor):
     def __init__(self):
         self.globals = Environment()
 
-        # Initialize runtime library
-        self.globals.values['nolout'] = Nolout()
-        self.globals.values['nolin'] = Nolin()
-        self.globals.values['time'] = Time()
-        self.globals.values['random'] = Random()
-        self.globals.values['int'] = Int()
-        self.globals.values['float'] = Float()
-        self.globals.values['roundup'] = RoundUp()
-        self.globals.values['rounddown'] = RoundDown()
+        # Initialize globals with runtime library
+        self.globals.values.update(RUNTIME_GLOBALS)
 
         self.environment = self.globals
 
