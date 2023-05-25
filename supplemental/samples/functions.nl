@@ -14,6 +14,11 @@ foo()
 add(9, 10)
 count(10)
 
+# foo(69) # Too many arguments
+# add(420) # Too few arguments
+# unknown() # Undeclared function
+# 6() # Not a callable object
+
 # z # Should not exist
 
 greg bar()
