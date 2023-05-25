@@ -32,6 +32,11 @@ class Resolver(ASTVisitor):
         self.scopes: list[dict[str, bool]] = [{}]
 
     def explore(self, program: list[Statement]) -> dict[Expression, int]:
+
+        # We keep track of function and loop nesting to ensure some statements are used correctly!
+        self.function_counter = 0
+        self.loop_counter = 0
+
         try:
             for stmt in program:
                 stmt.visit(self)
@@ -63,8 +68,10 @@ class Resolver(ASTVisitor):
         for param in stmt.params:
             self._define(param)
 
+        self.function_counter += 1
         for stmt in stmt.body.stmts:
             stmt.visit(self)
+        self.function_counter -= 1
 
         self.scopes.pop()
 
@@ -94,6 +101,10 @@ class Resolver(ASTVisitor):
         stmt.expr.visit(self)
 
     def visit_return(self, stmt: ReturnStatement):
+        # This needs to be in a function!
+        if self.function_counter == 0:
+            raise UnexpectedReturnException(stmt.token.line, stmt.token.file_name)
+
         if stmt.has_value():
             stmt.value.visit(self)
 

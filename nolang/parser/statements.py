@@ -108,8 +108,9 @@ class ExprStatement(Statement):
         return self.expr.file_name()
 
 class ReturnStatement(Statement):
-    def __init__(self, value: Expression) -> None:
+    def __init__(self, token: Token, value: Expression) -> None:
         super().__init__()
+        self.token = token
         self.value = value
 
     def visit(self, visitor: ASTVisitor):

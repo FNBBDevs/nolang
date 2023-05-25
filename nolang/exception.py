@@ -81,10 +81,6 @@ class InvalidBindingException(SyntaxError):
     def __str__(self) -> str:
         return f'Cannot bind to non-lvalue expression \'{self.expr}\' {self._loc_to_str()}'
 
-class UnexpectedReturnException(SyntaxError):
-    def __str__(self) -> str:
-        return f'\'pay\' must be in function body {self._loc_to_str()}'
-
 # Semantic Exceptions
 
 class SemanticError(NolangException):
@@ -110,6 +106,10 @@ class VariableRedefinitionException(SemanticError):
 
     def __str__(self) -> str:
         return f'{self.name} has already been defined in this scope {self._loc_to_str()}'
+
+class UnexpectedReturnException(SemanticError):
+    def __str__(self) -> str:
+        return f'\'pay\' must be in function body {self._loc_to_str()}'
 
 # Runtime Exceptions
 

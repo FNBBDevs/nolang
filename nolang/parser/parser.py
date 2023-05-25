@@ -12,7 +12,6 @@ class Parser:
     def parse(self, tokens: list[Token], filename: str) -> list[Statement]:
         self.tokens = tokens
         self.filename = filename
-        self.function_counter = 0
         self.exceptions = []
 
         """Current token to be examined in the current production rule"""
@@ -73,13 +72,7 @@ class Parser:
 
         self._consume(Tokens.R_PARENTHESIS)
         self._consume(Tokens.NEWLINE)
-
-        # We increment the function counter to keep track of nested functions
-        self.function_counter += 1
-        body = self._body()
-        self.function_counter -= 1
-
-        return FunDeclaration(id, params, body)
+        return FunDeclaration(id, params, self._body())
 
     def cmpd_stmt(self) -> Statement:
         if self._next_is(Tokens.IF): return self.if_stmt()
@@ -141,16 +134,12 @@ class Parser:
         return ExprStatement(self.expression())
 
     def return_stmt(self) -> Statement:
-        # Need to be in a function!
-        if self.function_counter == 0:
-            token = self._previous()
-            raise UnexpectedReturnException(token.line, token.file_name)
-
         value = None
+        token = self._previous()
         if self._peek().type_id != Tokens.NEWLINE:
             value = self.expression()
 
-        return ReturnStatement(value)
+        return ReturnStatement(token, value)
 
     def expression(self) -> Expression:
         return self.assign_expr()
