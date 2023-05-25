@@ -66,6 +66,7 @@ class Environment:
 class Interpreter(ASTVisitor):
     def __init__(self):
         self.globals = Environment()
+        self.resolver = Resolver()
 
         # Initialize globals with runtime library
         self.globals.values.update(RUNTIME_GLOBALS)
@@ -74,8 +75,7 @@ class Interpreter(ASTVisitor):
 
     def explore(self, program: list[Statement]):
         try:
-            resolver = Resolver()
-            self.bindings = resolver.explore(program)
+            self.bindings = self.resolver.explore(program)
 
             for stmt in program:
                 stmt.visit(self)
