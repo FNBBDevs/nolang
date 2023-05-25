@@ -113,7 +113,7 @@ class Parser:
 
     def bounce_loop(self) -> Statement:
         self._consume(Tokens.NEWLINE)
-        bounce_body = self.body()
+        bounce_body = self._body()
         self._consume(Tokens.WHILE)
         cond = self.expression()
         self._consume(Tokens.NEWLINE)

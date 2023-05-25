@@ -8,6 +8,7 @@
 
 # Statements
 <stmt> ::= <decl_stmt> .
+<body> ::= INDENT ( <stmt> )+ DEDENT .
 
 # Declaration statements
 <decl_stmt> ::=
@@ -35,8 +36,6 @@
 <std_stmt> ::= ( <return_stmt> | <expr_stmt> ) NEWLINE .
 <return_stmt> ::= "pay" ( <expr> )? .
 <expr_stmt> ::= <expr> .
-
-<body> ::= INDENT ( <stmt> )+ DEDENT
 
 # Operator precedence
 # Op                Symbol          Precedence
