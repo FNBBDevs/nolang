@@ -8,10 +8,6 @@ class Statement:
         """Pure virtual function that calls respective handler for this type in the visitor"""
         raise NotImplementedError
 
-    def file_name(self) -> str:
-        """Pure virtual function that calls respective handler for this type in the visitor"""
-        raise NotImplementedError
-
 class Body:
     """
     Bodies/Blocks are not statements in Nolang but rather extensions for compound
@@ -30,11 +26,11 @@ class VarDeclaration(Statement):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_vardecl(self)
 
-    def file_name(self) -> str:
-        return self.id.file_name
-
     def has_initializer(self) -> bool:
         return self.init is not None
+
+    def __repr__(self) -> str:
+        return f'no {self.id.value}{f" = {self.init}" if self.has_initializer() else ""}'
 
 class FunDeclaration(Statement):
     def __init__(self, id: Token, params: list[Token], body: Body) -> None:
@@ -46,8 +42,8 @@ class FunDeclaration(Statement):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_fundecl(self)
 
-    def file_name(self) -> str:
-        return self.id.file_name
+    def __repr__(self) -> str:
+        return f'greg {self.id.value}({self.params})'
 
 class IfStatement(Statement):
     def __init__(self, cond: Expression, if_body: Body, erm_bodies: list[tuple[Expression, Body]], hermph_body: Body) -> None:
@@ -59,9 +55,6 @@ class IfStatement(Statement):
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_ifstmt(self)
-
-    def file_name(self) -> str:
-        return self.cond.file_name()
 
     def has_hermph(self) -> bool:
         return self.hermph_body is not None
@@ -76,9 +69,6 @@ class WhileStatement(Statement):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_whileloop(self)
 
-    def file_name(self) -> str:
-        return self.cond.file_name()
-
     def has_hermph(self) -> bool:
         return self.hermph_body is not None
 
@@ -91,9 +81,6 @@ class BounceStatement(Statement):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_bounceloop(self)
 
-    def file_name(self) -> str:
-        return self.cond.file_name()
-
 class ExprStatement(Statement):
     """Statement that may cause a side-effect and evaluate"""
 
@@ -104,8 +91,8 @@ class ExprStatement(Statement):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_exprstmt(self)
 
-    def file_name(self) -> str:
-        return self.expr.file_name()
+    def __repr__(self) -> str:
+        return repr(self.expr)
 
 class ReturnStatement(Statement):
     def __init__(self, token: Token, value: Expression) -> None:
@@ -116,8 +103,8 @@ class ReturnStatement(Statement):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_return(self)
 
-    def file_name(self) -> str:
-        return self.value.file_name()
-
     def has_value(self) -> bool:
         return self.value is not None
+
+    def __repr__(self) -> str:
+        return f'pay {f"{self.value}" if self.has_value() else ""}'

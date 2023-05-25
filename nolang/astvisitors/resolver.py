@@ -132,8 +132,8 @@ class Resolver(ASTVisitor):
         scope = self.scopes[-1]
 
         # Catch user using unitialized variable in expression
-        if len(scope) > 0 and expr.id.lexeme in scope and not scope[expr.id.lexeme]:
-            raise UndefinedVariableUsage(expr.id.lexeme, expr.id.line, expr.id.file_name)
+        if len(scope) > 0 and expr.name() in scope and not scope[expr.name()]:
+            raise UndefinedVariableUsage(expr.name(), expr.id.line, expr.id.file_name)
 
         self._resolve(expr, expr.id)
 

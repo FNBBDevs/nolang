@@ -155,14 +155,14 @@ class Interpreter(ASTVisitor):
         args = [ arg.visit(self) for arg in expr.args ]
 
         if not self._is_type(callee, NolangCallable):
-            raise NotCallableException(expr.callee, expr.paren.line, expr.file_name())
+            raise NotCallableException(expr.callee, expr.paren.line, expr.paren.file_name)
 
         callee: NolangCallable
         arity = callee.arity()
         given = len(args)
 
         if arity != given:
-            raise InvalidArgumentsException(expr.callee, arity, given, expr.paren.line, expr.file_name())
+            raise InvalidArgumentsException(expr.callee, arity, given, expr.paren.line, expr.paren.file_name)
 
         return callee(self, args)
 
