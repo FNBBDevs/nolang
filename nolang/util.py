@@ -1,6 +1,5 @@
 
 from types import NoneType
-from .runtime.callables import NolangCallable
 
 def is_digit(c: str):
     return ord('0') <= ord(c) <= ord('9') if c else False
@@ -18,8 +17,7 @@ def py_type_to_nl(t: type):
     elif t is str: return 'string'
     elif t is bool: return 'bool'
     elif t is NoneType: return 'nol'
-    elif t is NolangCallable: return 'greg'
-    else: raise Exception(f'Unknown nolang type {t}')
+    else: return 'greg'
 
 def stringify(val) -> str:
     if val is None:
