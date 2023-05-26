@@ -64,7 +64,7 @@ class NolangNol(NolangType):
     def __str__(self) -> str:
         return 'nol'
 
-# Nol type can be treated as immutable
+# nol type can be treated as immutable
 NOL = NolangNol()
 
 class Interpreter: pass

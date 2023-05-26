@@ -292,10 +292,6 @@ class Interpreter(ASTVisitor):
                 return t
 
     @staticmethod
-    def _is_numeric(val):
-        return Interpreter._is_type(val, int, float)
-
-    @staticmethod
     def _to_truthy(val: NolangType):
         """ In Nolang, nol is False, False (nolang) is False (python), 0 and 0.0 are False, and everything else is True"""
         if type(val) is NolangNol: return False
