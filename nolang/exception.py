@@ -2,9 +2,6 @@
 from .parser.expressions import Expression
 from .lexer.token import Token
 
-from .util import py_type_to_nl
-from .util import stringify
-
 class NolangException(Exception):
     def __init__(self, line: int, file_name: str, *args: object) -> None:
         super().__init__(*args)
@@ -128,7 +125,7 @@ class InvalidTypeException(RuntimeException):
         self.operand = operand
 
     def __str__(self) -> str:
-        return f'Invalid operand {py_type_to_nl(type(self.operand))} ({stringify(self.operand)}) for operator \'{self.op}\' {self._loc_to_str()}'
+        return f'Invalid operand {repr(self.operand)} for operator \'{self.op}\' {self._loc_to_str()}'
 
 class IncompatibleTypesException(RuntimeException):
     def __init__(self, op: Token, operand1, operand2, *args: object) -> None:
@@ -141,7 +138,7 @@ class IncompatibleTypesException(RuntimeException):
         return f'Operator \'{self.op}\' on incompatible types {self._operands_str()} {self._loc_to_str()}'
 
     def _operands_str(self) -> str:
-        return f'{py_type_to_nl(type(self.operand1))} ({stringify(self.operand1)}) and {py_type_to_nl(type(self.operand2))} ({stringify(self.operand2)})'
+        return f'{repr(self.operand1)} and {repr(self.operand2)}'
 
 class DivideByZeroException(RuntimeException):
     def __init__(self, *args: object) -> None:

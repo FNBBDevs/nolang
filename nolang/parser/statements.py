@@ -1,7 +1,9 @@
 
-from .parser import ASTVisitor
 from .expressions import Expression
 from ..lexer.lexer import Token
+
+# Forward declare the visitor interface
+class ASTVisitor: pass
 
 class Statement:
     def visit(self, _: ASTVisitor):

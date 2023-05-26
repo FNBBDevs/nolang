@@ -1,6 +1,7 @@
 
-from .types.callables import NolangCallable
-from .util import stringify
+from .types import *
+from .parser.expressions import *
+from .parser.statements import *
 from .exception import *
 
 import time
@@ -13,15 +14,15 @@ class Nolout(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[object]):
-        print(stringify(args[0]))
+    def __call__(self, _, args: list[NolangType]):
+        print(args[0].print_val())
 
 class Nolin(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[object]):
-        return input(stringify(args[0]))
+    def __call__(self, _, args: list[NolangType]):
+        return input(args[0].print_val())
 
 class Time(NolangCallable):
     def arity(self) -> int:
@@ -41,7 +42,7 @@ class Int(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[object]):
+    def __call__(self, _, args: list[NolangType]):
         try:
             return int(args[0])
         except ValueError:
@@ -52,7 +53,7 @@ class Float(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[object]):
+    def __call__(self, _, args: list[NolangType]):
         try:
             return float(args[0])
         except ValueError:
@@ -63,7 +64,7 @@ class RoundDown(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[object]):
+    def __call__(self, _, args: list[NolangType]):
         try:
             return int(args[0])
         except ValueError:
@@ -73,7 +74,7 @@ class RoundUp(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[object]):
+    def __call__(self, _, args: list[NolangType]):
         try:
             return int(math.ceil(args[0]))
         except ValueError:

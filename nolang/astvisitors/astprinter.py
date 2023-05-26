@@ -4,9 +4,6 @@ from ..parser.expressions import *
 from ..parser.statements import *
 from ..lexer.token import Tokens
 
-from ..util import py_type_to_nl
-from ..util import stringify
-
 from io import FileIO
 
 class ASTPrinter(ASTVisitor):
@@ -142,8 +139,9 @@ class ASTPrinter(ASTVisitor):
         return expr_node
 
     def visit_literal(self, expr: Literal):
-        val = stringify(expr.value())
-        typ = py_type_to_nl(type(expr.value()))
+        val = expr.value()
+        typ = repr(val)
+        val = str(val)
 
         # Make escape sequences literal
         val = val.replace('\\', '\\\\')
