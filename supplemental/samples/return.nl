@@ -6,11 +6,8 @@ greg ory(x, y)
 nolout(ory(1, 3))
 
 greg fib(n)
-    if n == 0
-        pay 1
-    
-    if n == 1
-        pay 1
+    if n <= 1
+        pay n
 
     pay fib(n - 2) + fib(n - 1)
 
