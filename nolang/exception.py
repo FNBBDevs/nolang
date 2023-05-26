@@ -18,14 +18,15 @@ class NolangException(Exception):
         """Returns a string representation indicating location in source where exception was called"""
         return f'\'{self.file_name}\':{self.line}'
 
-# Compile-time Exceptions
+# Syntax Exceptions
 
 class SyntaxError(NolangException):
-    def __init__(self, *args: object) -> None:
+    def __init__(self, *args: object, message: str = 'Syntax error') -> None:
         super().__init__(*args)
+        self.message = message
 
     def __str__(self) -> str:
-        return f'Syntax error in {self._loc_to_str()}'
+        return f'{self.message} in {self._loc_to_str()}'
 
 class CharacterUnexpectedException(SyntaxError):
     def __init__(self, char: str, *args: object) -> None:
@@ -80,6 +81,36 @@ class InvalidBindingException(SyntaxError):
     def __str__(self) -> str:
         return f'Cannot bind to non-lvalue expression \'{self.expr}\' {self._loc_to_str()}'
 
+# Semantic Exceptions
+
+class SemanticError(NolangException):
+    def __init__(self, *args: object, message: str = 'Semantic error') -> None:
+        super().__init__(*args)
+        self.message = message
+
+    def __str__(self) -> str:
+        return f'{self.message} in {self._loc_to_str()}'
+
+class UndefinedVariableUsage(SemanticError):
+    def __init__(self, name: str, *args: object) -> None:
+        super().__init__(*args)
+        self.name = name
+
+    def __str__(self) -> str:
+        return f'Using variable \'{self.name}\' before initialization {self._loc_to_str()}'
+
+class VariableRedefinitionException(SemanticError):
+    def __init__(self, name: str, *args: object) -> None:
+        super().__init__(*args)
+        self.name = name
+
+    def __str__(self) -> str:
+        return f'{self.name} has already been defined in this scope {self._loc_to_str()}'
+
+class UnexpectedReturnException(SemanticError):
+    def __str__(self) -> str:
+        return f'\'pay\' must be in function body {self._loc_to_str()}'
+
 # Runtime Exceptions
 
 class RuntimeException(NolangException):
@@ -119,14 +150,6 @@ class DivideByZeroException(RuntimeException):
     def __str__(self) -> str:
         return f'Divide by zero {self._loc_to_str()}'
 
-class VariableRedefinitionException(RuntimeException):
-    def __init__(self, name: str, *args: object) -> None:
-        super().__init__(*args)
-        self.name = name
-
-    def __str__(self) -> str:
-        return f'{self.name} has already been defined in this scope {self._loc_to_str()}'
-
 class VariableNotDefinedException(RuntimeException):
     def __init__(self, name: str, *args: object) -> None:
         super().__init__(*args)
@@ -134,3 +157,27 @@ class VariableNotDefinedException(RuntimeException):
 
     def __str__(self) -> str:
         return f'{self.name} has not been defined in this scope {self._loc_to_str()}'
+
+class NotCallableException(RuntimeException):
+    def __init__(self, callee: Expression, *args: object) -> None:
+        super().__init__(*args)
+        self.callee = callee
+
+    def __str__(self) -> str:
+        return f'{self.callee} is not a callable object {self._loc_to_str()}'
+
+class InvalidArgumentsException(RuntimeException):
+    def __init__(self, callee: Expression, arity: int, given: int, *args: object) -> None:
+        super().__init__(*args)
+        self.callee = callee
+        self.arity = arity
+        self.given = given
+
+    def __str__(self) -> str:
+        return f'{self.callee} requires {self.arity} arguments but {self.given} were provided {self._loc_to_str()}'
+
+# Non-exceptional exceptions
+
+class Return(Exception):
+    def __init__(self, value) -> None:
+        self.value = value

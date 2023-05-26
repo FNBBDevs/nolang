@@ -251,7 +251,7 @@ class Lexer:
         else:
             self._error(CharacterUnexpectedException('\\', self.line, self.file_name))
 
-    ### Util ###
+    ### Utilities ###
 
     def _advance(self) -> str:
         """Advance a character in the source string. Returns None and does not advance if at end."""

@@ -12,10 +12,6 @@ class Expression:
         """Pure virtual function that calls respective handler for this type in the visitor"""
         raise NotImplementedError
 
-    def file_name(self) -> str:
-        """Pure virtual function that calls respective handler for this type in the visitor"""
-        raise NotImplementedError
-
 class BinaryExpression(Expression):
     """Infix operator with two operands"""
 
@@ -28,11 +24,8 @@ class BinaryExpression(Expression):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_binexpr(self)
 
-    def file_name(self) -> str:
-        return self.op.file_name
-
     def __repr__(self) -> str:
-        return f'{self.left} {self.op} {self.right}'
+        return f'({self.left}) {self.op} ({self.right})'
 
 class UnaryExpression(Expression):
     """Postfix/Prefix operator with one operand"""
@@ -45,11 +38,8 @@ class UnaryExpression(Expression):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_unexpr(self)
 
-    def file_name(self) -> str:
-        return self.op.file_name
-
     def __repr__(self) -> str:
-        return f'{self.op} {self.operand}'
+        return f'{self.op} ({self.operand})'
 
 class AssignExpression(Expression):
     def __init__(self, id: Token, assign: Expression) -> None:
@@ -60,11 +50,21 @@ class AssignExpression(Expression):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_assign(self)
 
-    def file_name(self) -> str:
-        return self.id.file_name
-
     def __repr__(self) -> str:
         return f'{self.id} = {self.assign}'
+
+class CallExpression(Expression):
+    def __init__(self, callee: Expression, paren: Token, args: list[Expression]) -> None:
+        super().__init__()
+        self.callee = callee
+        self.args = args
+        self.paren = paren
+
+    def visit(self, visitor: ASTVisitor):
+        return visitor.visit_call(self)
+
+    def __repr__(self) -> str:
+        return f'{self.callee}({self.args})'
 
 class Literal(Expression):
     """Immediate value in the domain of the parser"""
@@ -75,9 +75,6 @@ class Literal(Expression):
 
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_literal(self)
-
-    def file_name(self) -> str:
-        return self.token.file_name
 
     def value(self):
         return self.token.value
@@ -95,11 +92,8 @@ class Identifier(Expression):
     def visit(self, visitor: ASTVisitor):
         return visitor.visit_identifier(self)
 
-    def file_name(self) -> str:
-        return self.id.file_name
-
     def name(self):
         return self.id.value
 
     def __repr__(self) -> str:
-        return str(self.id.value)
+        return self.name()

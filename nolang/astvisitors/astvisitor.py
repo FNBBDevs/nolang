@@ -11,6 +11,9 @@ class ASTVisitor:
     def visit_vardecl(self, stmt: VarDeclaration):
         raise NotImplementedError()
 
+    def visit_fundecl(self, stmt: FunDeclaration):
+        raise NotImplementedError()
+
     def visit_ifstmt(self, stmt: IfStatement):
         raise NotImplementedError()
 
@@ -20,13 +23,16 @@ class ASTVisitor:
     def visit_bounceloop(self, stmt: BounceStatement):
         raise NotImplementedError()
 
-    def visit_printstmt(self, stmt: PrintStatement):
-        raise NotImplementedError()
-
     def visit_exprstmt(self, stmt: ExprStatement):
         raise NotImplementedError()
 
+    def visit_return(self, stmt: ReturnStatement):
+        raise NotImplementedError()
+
     def visit_assign(self, expr: AssignExpression):
+        raise NotImplementedError()
+
+    def visit_call(self, expr: CallExpression):
         raise NotImplementedError()
 
     def visit_binexpr(self, expr: BinaryExpression):

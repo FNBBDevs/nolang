@@ -10,13 +10,14 @@ def is_alpha(c: str):
 def is_alpha_numeric(c: str):
     return is_digit(c) or is_alpha(c) if c else False
 
+# TODO: Need to define custom object type and use __str__ for this!!!
 def py_type_to_nl(t: type):
     if t is int: return 'int'
     elif t is float: return 'float'
     elif t is str: return 'string'
     elif t is bool: return 'bool'
     elif t is NoneType: return 'nol'
-    else: raise Exception(f'Unknown nolang type {t}')
+    else: return 'greg'
 
 def stringify(val) -> str:
     if val is None:

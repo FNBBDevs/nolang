@@ -1,11 +1,14 @@
 
 from .astvisitor import ASTVisitor
+from .resolver import Resolver
+
 from ..parser.expressions import *
 from ..parser.statements import *
+from ..types.callables import *
 from ..lexer.token import Tokens
 
+from ..runtime import RUNTIME_GLOBALS
 from ..exception import *
-from ..util import stringify
 
 class Environment: pass
 class Environment:
@@ -26,63 +29,73 @@ class Environment:
         self.values: dict[str, object] = {}
 
     def define(self, id: Token, value = None):
-        name = id.lexeme
-
-        # Value cannot already be defined
-        if name in self.values:
-            raise VariableRedefinitionException(name, id.line, id.file_name)
-
         # Insert new entry in the dictionary in the most recent scope always!
-        self.values[name] = value
+        self.values[id.lexeme] = value
 
-    def assign(self, id: Token, value):
+    def get_at(self, id: Token, distance: int) -> object:
+        return self._env_at(distance).values[id.lexeme]
+
+    def get(self, id: Token) -> object:
         name = id.lexeme
 
-        if name in self.values:
-            self.values[name] = value
-            return
+        if name not in self.values:
+            raise VariableNotDefinedException(name, id.line, id.file_name)
 
-        # If not found search for the variable in parent scope
-        if self.enclosing:
-            self.enclosing.assign(id, value)
-            return
+        return self.values[name]
 
-        raise VariableNotDefinedException(name, id.line, id.file_name)
+    def assign_at(self, id: Token, new_value, distance: int) -> None:
+        self._env_at(distance).values[id.lexeme] = new_value
 
-    def get(self, id: Token):
+    def assign(self, id: Token, new_value) -> None:
         name = id.lexeme
 
-        if name in self.values:
-            return self.values[name]
+        if name not in self.values:
+            raise VariableNotDefinedException(name, id.line, id.file_name)
 
-        # If not found search for the variable in parent scope
-        if self.enclosing:
-            return self.enclosing.get(id)
+        self.values[name] = new_value
 
-        raise VariableNotDefinedException(name, id.line, id.file_name)
+    ### Utilities ###
+
+    def _env_at(self, distance: int) -> Environment:
+        environment = self
+        for _ in range(distance):
+            environment = environment.enclosing
+
+        return environment
 
 class Interpreter(ASTVisitor):
     def __init__(self):
-        self.environment = Environment()
+        self.globals = Environment()
+        self.resolver = Resolver()
+
+        # Initialize globals with runtime library
+        self.globals.values.update(RUNTIME_GLOBALS)
+
+        self.environment = self.globals
 
     def explore(self, program: list[Statement]):
         try:
+            self.bindings = self.resolver.explore(program)
+
             for stmt in program:
                 stmt.visit(self)
 
-        except RuntimeException as e:
+        except (RuntimeException, SemanticError) as e:
             raise e
 
-        # Catch python exceptions
-        except Exception as e:
-            raise RuntimeException(-1, stmt.file_name(), message = f'{repr(e)} - This is an internal error')
-
     def visit_vardecl(self, stmt: VarDeclaration):
-        val = None
+        value = None
         if stmt.has_initializer():
-            val = stmt.init.visit(self)
+            value = stmt.init.visit(self)
 
-        self.environment.define(stmt.id, val)
+        self.environment.define(stmt.id, value)
+
+    def visit_fundecl(self, stmt: FunDeclaration):
+        # We give the function the current environment when DECLARED.
+        # That way it can use variables outside of its scope
+        fun = NolangFunction(stmt, self.environment)
+
+        self.environment.define(stmt.id, fun)
 
     def visit_ifstmt(self, stmt: IfStatement):
         cond = stmt.cond.visit(self)
@@ -111,17 +124,47 @@ class Interpreter(ASTVisitor):
         while self._to_truthy(stmt.cond.visit(self)):
             self._execute_body(stmt.bounce_body)
 
-    def visit_printstmt(self, stmt: PrintStatement):
-        val = stmt.expr.visit(self)
-        print(stringify(val))
-
     def visit_exprstmt(self, stmt: ExprStatement):
         stmt.expr.visit(self)
 
+    def visit_return(self, stmt: ReturnStatement):
+        value = None
+        if stmt.has_value():
+            value = stmt.value.visit(self)
+
+        raise Return(value)
+
     def visit_assign(self, expr: AssignExpression):
-        val = expr.assign.visit(self)
-        self.environment.assign(expr.id, val)
-        return val
+        value = expr.assign.visit(self)
+        distance = self.bindings.get(expr)
+
+        # We know which environment local variables are in
+        if distance is not None:
+            self.environment.assign_at(expr.id, value, distance)
+
+        # Distance is None, this might be a global variable
+        else:
+            self.globals.assign(expr.id, value)
+
+        return value
+
+    def visit_call(self, expr: CallExpression):
+        callee = expr.callee.visit(self)
+
+        # Static initialization of arguments
+        args = [ arg.visit(self) for arg in expr.args ]
+
+        if not self._is_type(callee, NolangCallable):
+            raise NotCallableException(expr.callee, expr.paren.line, expr.paren.file_name)
+
+        callee: NolangCallable
+        arity = callee.arity()
+        given = len(args)
+
+        if arity != given:
+            raise InvalidArgumentsException(expr.callee, arity, given, expr.paren.line, expr.paren.file_name)
+
+        return callee(self, args)
 
     def visit_binexpr(self, expr: BinaryExpression):
         val1 = expr.left.visit(self)
@@ -198,8 +241,6 @@ class Interpreter(ASTVisitor):
             case Tokens.PLUS:
                 self._check_numeric(val, expr.op)
                 return +val
-            case Tokens.NOLIN:
-                return input(val)
 
         # This should never happen in a completed implementation, do it for debugging purposes
         raise Exception(f'Failed to interpret expression: {expr}')
@@ -208,15 +249,23 @@ class Interpreter(ASTVisitor):
         return expr.value()
 
     def visit_identifier(self, expr: Identifier):
-        return self.environment.get(expr.id)
+        distance = self.bindings.get(expr)
 
-    # Utilities
+        # We know which environment local variables are in
+        if distance is not None:
+            return self.environment.get_at(expr.id, distance)
 
-    def _execute_body(self, body: Body):
+        # Distance is None, this might be a global variable
+        else:
+            return self.globals.get(expr.id)
+
+    ### Utilities ###
+
+    def _execute_body(self, body: Body, new_env: Environment = None):
         previous_env = self.environment
 
         # Create a new environment
-        self.environment = Environment(previous_env)
+        self.environment = Environment(previous_env) if new_env is None else new_env
 
         try:
             # Execute all the statements
@@ -230,7 +279,7 @@ class Interpreter(ASTVisitor):
     @staticmethod
     def _is_type(val, *types: type):
         for t in types:
-            if type(val) is t:
+            if isinstance(val, t):
                 return True
 
         return False

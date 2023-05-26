@@ -10,9 +10,10 @@ class Tokens(Enum):
     R_PARENTHESIS   = auto()
     COMMA           = auto()
     NO              = auto()
+    GREG            = auto()
     IF              = auto()
-    ERM            = auto()
-    HERMPH            = auto()
+    ERM             = auto()
+    HERMPH          = auto()
     PLUS            = auto()
     MINUS           = auto()
     STAR            = auto()
@@ -39,12 +40,12 @@ class Tokens(Enum):
     IDENTIFIER      = auto()
     NOL             = auto()
     NEWLINE         = auto()
-    NOLOUT          = auto()
-    NOLIN           = auto()
+    RETURN          = auto()
     BOUNCE          = auto()
 
 RESERVED_IDENTIFIERS = {
     'no': Tokens.NO,
+    'greg': Tokens.GREG,
     'if': Tokens.IF,
     'erm': Tokens.ERM,
     'hermph': Tokens.HERMPH,
@@ -56,8 +57,7 @@ RESERVED_IDENTIFIERS = {
     'True': Tokens.TRUE,
     'False': Tokens.FALSE,
     'nol': Tokens.NOL,
-    'nolout': Tokens.NOLOUT,
-    'nolin': Tokens.NOLIN,
+    'pay': Tokens.RETURN,
     'bounce': Tokens.BOUNCE
 }
 
