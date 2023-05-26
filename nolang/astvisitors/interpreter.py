@@ -164,7 +164,7 @@ class Interpreter(ASTVisitor):
         if arity != given:
             raise InvalidArgumentsException(expr.callee, arity, given, expr.paren.line, expr.paren.file_name)
 
-        return callee(self, args)
+        return callee(self, args, expr.paren.line, expr.paren.file_name)
 
     def visit_binexpr(self, expr: BinaryExpression):
         val1: NolangType = expr.left.visit(self)

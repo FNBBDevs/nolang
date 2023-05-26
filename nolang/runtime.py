@@ -14,14 +14,14 @@ class Nolout(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[NolangType]):
+    def __call__(self, _, args: list[NolangType], *__):
         print(args[0])
 
 class Nolin(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[NolangType]):
+    def __call__(self, _, args: list[NolangType], *__):
         return NolangString(input(args[0]))
 
 class Time(NolangCallable):
@@ -42,53 +42,49 @@ class Int(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[NolangType]):
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
         try:
             return NolangInt(args[0].value)
 
-        except Exception:
-            # klim, implement error, thanks, or I can later
-            return NolangInt(420)
-
-# TODO: Implement actual exceptions!
+        except ValueError:
+            raise RuntimeException(line, file_name, message=f'Cannot convert {args[0]} to int')
 
 class Float(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[NolangType]):
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
         try:
             return NolangFloat(args[0].value)
 
-        except Exception:
-            # klim, implement error, thanks, or I can later
-            return NolangFloat(420.0)
+        except ValueError:
+            raise RuntimeException(line, file_name, message=f'Cannot convert {args[0]} to float')
 
 class RoundDown(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[NolangType]):
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
         try:
-            return NolangInt(args[0].value)
+            return NolangInt(math.floor(args[0].value))
 
-        except Exception:
-            return NolangString(args[0].value)
+        except TypeError:
+            raise RuntimeException(line, file_name, message=f'Invalid type {repr(args[0])}')
 
 class RoundUp(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[NolangType]):
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
         try:
             return NolangInt(math.ceil(args[0].value))
 
-        except Exception:
-            return NolangString(args[0].value)
+        except TypeError:
+            raise RuntimeException(line, file_name, message=f'Invalid type {repr(args[0])}')
 
 # Global runtime, this should be immutable!
 
-RUNTIME_GLOBALS: dict[str, object] = \
+RUNTIME_GLOBALS: dict[str, NolangType] = \
 {
     'nolout':    Nolout(),
     'nolin':     Nolin(),

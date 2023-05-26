@@ -73,7 +73,7 @@ class NolangCallable(NolangType):
     def arity(self) -> int:
         raise NotImplementedError()
 
-    def __call__(self, interpreter: Interpreter, args: list[NolangType]):
+    def __call__(self, interpreter: Interpreter, args: list[NolangType], line: int, file_name: str):
         raise NotImplementedError()
 
     def __str__(self) -> str:
@@ -88,7 +88,7 @@ class NolangFunction(NolangCallable):
     def arity(self) -> int:
         return len(self.fun.params)
 
-    def __call__(self, interpreter: Interpreter, args: list[NolangType]):
+    def __call__(self, interpreter: Interpreter, args: list[NolangType], *_):
         from .astvisitors.interpreter import Environment
         env = Environment(self.env)
 
