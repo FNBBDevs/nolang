@@ -7,7 +7,7 @@ bounce
     nolout('Choose an item:')
     nolout('1. Nolan')
     nolout('2. Ethan')
-    nolout('3. Klim')
+    nolout('3. Spice')
     nolout('4. Quit')
 
     choice = int(nolin('> '))
