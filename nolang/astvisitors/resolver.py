@@ -137,7 +137,7 @@ class Resolver(ASTVisitor):
 
         self._resolve(expr, expr.id)
 
-    ### Util ###
+    ### Utilities ###
 
     def _visit_body(self, body: Body):
         self.scopes.append({})

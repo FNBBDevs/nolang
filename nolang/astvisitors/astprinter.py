@@ -159,7 +159,7 @@ class ASTPrinter(ASTVisitor):
     def visit_identifier(self, expr: Identifier):
         return self._make_node(f'\\"{expr.name()}\\"')
 
-    ### Util ###
+    ### Utilities ###
 
     def _make_node(self, label: str) -> int:
         self.node_counter += 1
