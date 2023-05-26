@@ -1,5 +1,4 @@
-from ..parser.expressions import *
-from ..parser.statements import *
+from ..parser.statements import FunDeclaration
 from ..exception import *
 
 class Interpreter: pass
@@ -8,7 +7,7 @@ class NolangCallable:
     def arity(self) -> int:
         raise NotImplementedError()
 
-    def __call__(self, interpreter: Interpreter, args: list[Expression]):
+    def __call__(self, interpreter: Interpreter, args: list[object]):
         raise NotImplementedError()
 
     def __str__(self) -> str:
@@ -22,7 +21,7 @@ class NolangFunction(NolangCallable):
     def arity(self) -> int:
         return len(self.fun.params)
 
-    def __call__(self, interpreter: Interpreter, args: list[Expression]):
+    def __call__(self, interpreter: Interpreter, args: list[object]):
         from ..astvisitors.interpreter import Environment
         env = Environment(self.env)
 

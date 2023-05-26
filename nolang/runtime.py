@@ -1,10 +1,8 @@
 
 from .types.callables import NolangCallable
-from .parser.expressions import *
-from .parser.statements import *
+from .util import stringify
 from .exception import *
 
-from .util import stringify
 import time
 import random
 import math
@@ -15,14 +13,14 @@ class Nolout(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[Expression]):
+    def __call__(self, _, args: list[object]):
         print(stringify(args[0]))
 
 class Nolin(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[Expression]):
+    def __call__(self, _, args: list[object]):
         return input(stringify(args[0]))
 
 class Time(NolangCallable):
@@ -43,7 +41,7 @@ class Int(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[Expression]):
+    def __call__(self, _, args: list[object]):
         try:
             return int(args[0])
         except ValueError:
@@ -54,7 +52,7 @@ class Float(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[Expression]):
+    def __call__(self, _, args: list[object]):
         try:
             return float(args[0])
         except ValueError:
@@ -65,7 +63,7 @@ class RoundDown(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[Expression]):
+    def __call__(self, _, args: list[object]):
         try:
             return int(args[0])
         except ValueError:
@@ -75,7 +73,7 @@ class RoundUp(NolangCallable):
     def arity(self) -> int:
         return 1
 
-    def __call__(self, _, args: list[Expression]):
+    def __call__(self, _, args: list[object]):
         try:
             return int(math.ceil(args[0]))
         except ValueError:
@@ -83,7 +81,7 @@ class RoundUp(NolangCallable):
 
 # Global runtime, this should be immutable!
 
-RUNTIME_GLOBALS: dict[str, NolangCallable] = \
+RUNTIME_GLOBALS: dict[str, object] = \
 {
     'nolout':    Nolout(),
     'nolin':     Nolin(),
