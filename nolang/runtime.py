@@ -44,11 +44,13 @@ class Int(NolangCallable):
 
     def __call__(self, _, args: list[NolangType]):
         try:
-            return NolangInt(args[0])
+            return NolangInt(args[0].value)
 
-        except ValueError:
+        except Exception:
             # klim, implement error, thanks, or I can later
             return NolangInt(420)
+
+# TODO: Implement actual exceptions!
 
 class Float(NolangCallable):
     def arity(self) -> int:
@@ -56,9 +58,9 @@ class Float(NolangCallable):
 
     def __call__(self, _, args: list[NolangType]):
         try:
-            return NolangFloat(args[0])
+            return NolangFloat(args[0].value)
 
-        except ValueError:
+        except Exception:
             # klim, implement error, thanks, or I can later
             return NolangFloat(420.0)
 
@@ -68,10 +70,10 @@ class RoundDown(NolangCallable):
 
     def __call__(self, _, args: list[NolangType]):
         try:
-            return NolangInt(args[0])
+            return NolangInt(args[0].value)
 
-        except ValueError:
-            return NolangString(args[0])
+        except Exception:
+            return NolangString(args[0].value)
 
 class RoundUp(NolangCallable):
     def arity(self) -> int:
@@ -79,10 +81,10 @@ class RoundUp(NolangCallable):
 
     def __call__(self, _, args: list[NolangType]):
         try:
-            return NolangInt(math.ceil(args[0]))
+            return NolangInt(math.ceil(args[0].value))
 
-        except ValueError:
-            return NolangString(args[0])
+        except Exception:
+            return NolangString(args[0].value)
 
 # Global runtime, this should be immutable!
 
