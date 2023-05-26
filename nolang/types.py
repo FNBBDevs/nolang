@@ -6,7 +6,7 @@ class NolangType:
     def __init__(self) -> None:
         self.value = self
 
-    def print_val(self) -> object:
+    def __repr__(self) -> str:
         return str(self)
 
     def __str__(self) -> str:
@@ -16,9 +16,6 @@ class NolangInt(NolangType):
     def __init__(self, value: int) -> None:
         super().__init__()
         self.value = int(value) # Force to int
-
-    def print_val(self) -> object:
-        return self.value
 
     def __repr__(self) -> str:
         return 'int'
@@ -80,7 +77,7 @@ class NolangCallable(NolangType):
         raise NotImplementedError()
 
     def __str__(self) -> str:
-        return f'<greg {self.arity()}-ary>'
+        return f'<function built-in {self.__class__.__name__} {self.arity()}-ary>'
 
 class NolangFunction(NolangCallable):
     def __init__(self, fun: FunDeclaration, env) -> None:
@@ -104,3 +101,6 @@ class NolangFunction(NolangCallable):
 
         except Return as ret:
             return ret.value
+
+    def __str__(self) -> str:
+        return f'<function {self.fun.id.value} {self.arity()}-ary>'

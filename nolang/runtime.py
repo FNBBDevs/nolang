@@ -15,14 +15,14 @@ class Nolout(NolangCallable):
         return 1
 
     def __call__(self, _, args: list[NolangType]):
-        print(args[0].print_val())
+        print(args[0])
 
 class Nolin(NolangCallable):
     def arity(self) -> int:
         return 1
 
     def __call__(self, _, args: list[NolangType]):
-        return input(args[0].print_val())
+        return input(args[0])
 
 class Time(NolangCallable):
     def arity(self) -> int:

@@ -125,7 +125,7 @@ class InvalidTypeException(RuntimeException):
         self.operand = operand
 
     def __str__(self) -> str:
-        return f'Invalid operand {repr(self.operand)} for operator \'{self.op}\' {self._loc_to_str()}'
+        return f'Invalid operand \'{repr(self.operand)}\' for operator \'{self.op}\' {self._loc_to_str()}'
 
 class IncompatibleTypesException(RuntimeException):
     def __init__(self, op: Token, operand1, operand2, *args: object) -> None:

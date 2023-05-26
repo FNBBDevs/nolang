@@ -187,27 +187,26 @@ class Interpreter(ASTVisitor):
             case Tokens.NEQUAL: return NolangBool(val1.value != val2.value)
             case Tokens.LESS_THAN:
                 Interpreter._check_ordering(val1, val2, expr.op)
-                return NolangBool(val1 < val2)
+                return NolangBool(val1.value < val2.value)
 
             case Tokens.GREATER_THAN:
                 Interpreter._check_ordering(val1, val2, expr.op)
-                return NolangBool(val1 > val2)
+                return NolangBool(val1.value > val2.value)
 
             case Tokens.LESS_THAN_EQ:
                 Interpreter._check_ordering(val1, val2, expr.op)
-                return NolangBool(val1 <= val2)
+                return NolangBool(val1.value <= val2.value)
 
             case Tokens.GREATER_THAN_EQ:
                 Interpreter._check_ordering(val1, val2, expr.op)
-                return NolangBool(val1 >= val2)
+                return NolangBool(val1.value >= val2.value)
 
             case Tokens.PLUS:
-                typ = Interpreter._check_summable(val1, val2, expr.op)
-
                 # NOTE: We use the 'safe' to-string functions which will catch any python exceptions that may be thrown
-                if typ is NolangString:
+                if type(val1) is NolangString or type(val2) is NolangString:
                     return NolangString(str(val1) + str(val2))
 
+                typ = Interpreter._check_numerics(val1, val2, expr.op)
                 return typ(val1.value + val2.value)
 
             case Tokens.MINUS:
@@ -219,10 +218,10 @@ class Interpreter(ASTVisitor):
                 return typ(val1.value * val2.value)
 
             case Tokens.SLASH:
-                Interpreter._check_numerics(val1, val2, expr.op)
+                typ = Interpreter._check_numerics(val1, val2, expr.op)
                 if val2.value == 0:
                     raise DivideByZeroException(expr.op.line, expr.op.file_name)
-                return NolangFloat(val1.value / val2.value)
+                return typ(val1.value / val2.value)
 
             case Tokens.PERCENT:
                 Interpreter._check_types(val1, val2, expr.op, NolangInt)
@@ -330,20 +329,6 @@ class Interpreter(ASTVisitor):
             raise IncompatibleTypesException(op, val1, val2)
 
         return typ1, typ2
-
-    @staticmethod
-    def _check_summable(val1, val2, op: Token):
-        """Checks if both values can be added together"""
-        typ1, typ2 = Interpreter._check_types(val1, val2, op, NolangInt, NolangFloat, NolangString)
-
-        if typ1 is NolangString or typ2 is NolangString:
-            return NolangString
-
-        # Integers are promoted to float if second operand is float
-        if typ1 is NolangFloat or typ2 is NolangFloat:
-            return NolangFloat
-
-        return NolangInt
 
     @staticmethod
     def _check_type(val, op, *types: type):
