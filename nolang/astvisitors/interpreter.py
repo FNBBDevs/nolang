@@ -104,7 +104,7 @@ class Interpreter(ASTVisitor):
             return
 
         for cond, body in stmt.erm_bodies:
-            if cond.visit(self):
+            if self._to_truthy(cond.visit(self)):
                 self._execute_body(body)
                 return
 
