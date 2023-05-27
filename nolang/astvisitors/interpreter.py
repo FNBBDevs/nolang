@@ -203,7 +203,8 @@ class Interpreter(ASTVisitor):
 
             case Tokens.PLUS:
                 # NOTE: We use the 'safe' to-string functions which will catch any python exceptions that may be thrown
-                if type(val1) is NolangString or type(val2) is NolangString:
+                if Interpreter._is_type(val1, NolangString) \
+                or Interpreter._is_type(val2, NolangString):
                     return NolangString(str(val1) + str(val2))
 
                 typ = Interpreter._check_numerics(val1, val2, expr.op)
@@ -294,9 +295,9 @@ class Interpreter(ASTVisitor):
     @staticmethod
     def _to_truthy(val: NolangType):
         """ In Nolang, nol is False, False (nolang) is False (python), 0 and 0.0 are False, and everything else is True"""
-        if type(val) is NolangNol: return False
-        if type(val) is NolangBool: return val.value
-        if type(val) is NolangInt or type(val) is NolangFloat: return val.value != 0
+        if Interpreter._is_type(val, NolangNol): return False
+        if Interpreter._is_type(val, NolangBool): return val.value
+        if Interpreter._is_type(val, NolangInt, NolangFloat): return val.value != 0
         return True
 
     @staticmethod
@@ -320,8 +321,8 @@ class Interpreter(ASTVisitor):
         """Checks if there is an ordering between the two input values"""
         typ1, typ2 = Interpreter._check_types(val1, val2, op, NolangInt, NolangFloat, NolangString)
 
-        if type(val1) is NolangString and type(val2) is not NolangString \
-        or type(val2) is NolangString and type(val1) is not NolangString:
+        if Interpreter._is_type(val1, NolangString) and not Interpreter._is_type(val2, NolangString) \
+        or Interpreter._is_type(val2, NolangString) and not Interpreter._is_type(val1, NolangString):
             raise IncompatibleTypesException(op, val1, val2)
 
         return typ1, typ2
