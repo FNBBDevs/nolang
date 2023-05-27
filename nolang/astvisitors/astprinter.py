@@ -3,6 +3,7 @@ from .astvisitor import ASTVisitor
 from ..parser.expressions import *
 from ..parser.statements import *
 from ..lexer.token import Tokens
+from ..types import *
 
 from io import FileIO
 
@@ -139,8 +140,8 @@ class ASTPrinter(ASTVisitor):
         return expr_node
 
     def visit_literal(self, expr: Literal):
-        val = expr.value()
-        typ = repr(val)
+        val: NolangType = expr.value()
+        typ = val.type_name()
         val = str(val)
 
         # Make escape sequences literal

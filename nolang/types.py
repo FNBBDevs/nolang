@@ -6,7 +6,7 @@ class NolangType:
     def __init__(self) -> None:
         self.value = self
 
-    def __repr__(self) -> str:
+    def type_name(self) -> str:
         return str(self)
 
     def __str__(self) -> str:
@@ -32,7 +32,7 @@ class NolangFloat(NolangType):
         super().__init__()
         self.value = float(value) # Force to float
 
-    def __repr__(self) -> str:
+    def type_name(self) -> str:
         return 'float'
 
     def __str__(self) -> str:
@@ -43,7 +43,7 @@ class NolangBool(NolangType):
         super().__init__()
         self.value = bool(value) # Force to bool
 
-    def __repr__(self) -> str:
+    def type_name(self) -> str:
         return 'bool'
 
     def __str__(self) -> str:
@@ -54,7 +54,7 @@ class NolangString(NolangType):
         super().__init__()
         self.value = str(value) # Force to string
 
-    def __repr__(self) -> str:
+    def type_name(self) -> str:
         return 'string'
 
     def __str__(self) -> str:

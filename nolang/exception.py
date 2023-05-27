@@ -125,7 +125,7 @@ class InvalidTypeException(RuntimeException):
         self.operand = operand
 
     def __str__(self) -> str:
-        return f'Invalid operand \'{repr(self.operand)}\' for operator \'{self.op}\' {self._loc_to_str()}'
+        return f'Invalid operand \'{self.operand.type_name()}\' for operator \'{self.op}\' {self._loc_to_str()}'
 
 class IncompatibleTypesException(RuntimeException):
     def __init__(self, op: Token, operand1, operand2, *args: object) -> None:
@@ -138,7 +138,7 @@ class IncompatibleTypesException(RuntimeException):
         return f'Operator \'{self.op}\' on incompatible types {self._operands_str()} {self._loc_to_str()}'
 
     def _operands_str(self) -> str:
-        return f'{repr(self.operand1)} and {repr(self.operand2)}'
+        return f'{self.operand1.type_name()} and {self.operand2.type_name()}'
 
 class DivideByZeroException(RuntimeException):
     def __init__(self, *args: object) -> None:

@@ -69,7 +69,7 @@ class RoundDown(NolangCallable):
             return NolangInt(math.floor(args[0].value))
 
         except TypeError:
-            raise RuntimeException(line, file_name, message=f'Invalid type {repr(args[0])}')
+            raise RuntimeException(line, file_name, message=f'Invalid type {args[0].type_name()}')
 
 class RoundUp(NolangCallable):
     def arity(self) -> int:
@@ -80,7 +80,7 @@ class RoundUp(NolangCallable):
             return NolangInt(math.ceil(args[0].value))
 
         except TypeError:
-            raise RuntimeException(line, file_name, message=f'Invalid type {repr(args[0])}')
+            raise RuntimeException(line, file_name, message=f'Invalid type {args[0].type_name()}')
 
 # Global runtime, this should be immutable!
 
