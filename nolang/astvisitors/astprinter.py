@@ -8,9 +8,8 @@ from ..types import *
 from io import FileIO
 
 class ASTPrinter(ASTVisitor):
-    """
-    ASTPrinter generates graphviz output of abstract syntax tree.
-    """
+    """ ASTPrinter generates graphviz output of abstract syntax tree. """
+
     def __init__(self, out: FileIO):
         self.out = out
 
@@ -26,12 +25,13 @@ class ASTPrinter(ASTVisitor):
             self._make_edge(stmt_node, stmt.visit(self))
             prev_node = stmt_node
 
+        self._make_edge(prev_node, self._make_node('EOF'))
         self.out.write('}\n')
 
     def visit_vardecl(self, stmt: VarDeclaration):
         vardecl_node = self._make_node('<var_decl>')
         self._make_edge(vardecl_node, self._make_node(r'\"no\"'))
-        self._make_edge(vardecl_node, self._make_node(f'\\"{stmt.id}\\"'))
+        self._make_edge(vardecl_node, self._make_id(stmt.id))
 
         if stmt.has_initializer():
             self._make_edge(vardecl_node, self._make_node(r'\"=\"'))
@@ -39,21 +39,29 @@ class ASTPrinter(ASTVisitor):
 
         return vardecl_node
 
-    def _create_body(self, body: Body):
-        body_node = self._make_node('<body>')
-        indent_node = self._make_node('INDENT')
-        self._make_edge(body_node, indent_node)
+    def visit_fundecl(self, stmt: FunDeclaration):
+        fundecl_node = self._make_node('<fun_decl>')
+        self._make_edge(fundecl_node, self._make_node(r'\"greg\"'))
+        self._make_edge(fundecl_node, self._make_id(stmt.id))
+        self._make_edge(fundecl_node, self._make_node(r'\"(\"'))
 
-        prev_node = body_node
-        for stmt in body.stmts:
-            stmt_node = self._make_node('<stmt>')
-            self._make_edge(prev_node, stmt_node)
-            self._make_edge(stmt_node, stmt.visit(self))
-            prev_node = stmt_node
+        if len(stmt.params) > 0:
+            self._make_edge(fundecl_node, self._make_id(stmt.params[0]))
 
-        dedent_node = self._make_node('DEDENT')
-        self._make_edge(body_node, dedent_node)
-        return body_node
+            # Skip first entry
+            iter_params = iter(stmt.params)
+            next(iter_params)
+
+            # Add remaining params
+            for param in iter_params:
+                self._make_edge(fundecl_node, self._make_node(r'\",\"'))
+                self._make_edge(fundecl_node, self._make_id(param))
+
+        self._make_edge(fundecl_node, self._make_node(r'\")\"'))
+        self._make_edge(fundecl_node, self._make_node('NEWLINE'))
+        self._make_edge(fundecl_node, self._create_body(stmt.body))
+
+        return fundecl_node
 
     def visit_ifstmt(self, stmt: IfStatement):
         if_node = self._make_node('<if_stmt>')
@@ -77,19 +85,31 @@ class ASTPrinter(ASTVisitor):
         return if_node
 
     def visit_whileloop(self, stmt: WhileStatement):
-        if_node = self._make_node('<while_loop>')
+        while_node = self._make_node('<while_loop>')
 
-        self._make_edge(if_node, self._make_node(r'\"while\"'))
-        self._make_edge(if_node, stmt.cond.visit(self))
-        self._make_edge(if_node, self._make_node('NEWLINE'))
-        self._make_edge(if_node, self._create_body(stmt.while_body))
+        self._make_edge(while_node, self._make_node(r'\"while\"'))
+        self._make_edge(while_node, stmt.cond.visit(self))
+        self._make_edge(while_node, self._make_node('NEWLINE'))
+        self._make_edge(while_node, self._create_body(stmt.while_body))
 
         if stmt.has_hermph():
-            self._make_edge(if_node, self._make_node(r'\"hermph\"'))
-            self._make_edge(if_node, self._make_node('NEWLINE'))
-            self._make_edge(if_node, self._create_body(stmt.hermph_body))
+            self._make_edge(while_node, self._make_node(r'\"hermph\"'))
+            self._make_edge(while_node, self._make_node('NEWLINE'))
+            self._make_edge(while_node, self._create_body(stmt.hermph_body))
 
-        return if_node
+        return while_node
+
+    def visit_bounceloop(self, stmt: BounceStatement):
+        bounce_node = self._make_node('<bounce_loop>')
+
+        self._make_edge(bounce_node, self._make_node(r'\"bounce\"'))
+        self._make_edge(bounce_node, self._make_node('NEWLINE'))
+        self._make_edge(bounce_node, self._create_body(stmt.bounce_body))
+        self._make_edge(bounce_node, self._make_node(r'\"while\"'))
+        self._make_edge(bounce_node, stmt.cond.visit(self))
+        self._make_edge(bounce_node, self._make_node('NEWLINE'))
+
+        return bounce_node
 
     def visit_exprstmt(self, stmt: ExprStatement):
         expr_node = self._make_node('<expr_stmt>')
@@ -107,7 +127,7 @@ class ASTPrinter(ASTVisitor):
 
     def visit_assign(self, expr: AssignExpression):
         assign_node = self._make_node('<assign_expr>')
-        self._make_edge(assign_node, self._make_node(f'\\"{expr.id}\\"'))
+        self._make_edge(assign_node, self._make_id(expr.id))
         self._make_edge(assign_node, self._make_node(r'\"=\"'))
         self._make_edge(assign_node, expr.assign.visit(self))
         return assign_node
@@ -119,9 +139,15 @@ class ASTPrinter(ASTVisitor):
 
         if len(expr.args) > 0:
             self._make_edge(call_node, expr.args[0].visit(self))
-            for i in range(1, len(expr.args)):
+
+            # Skip first entry
+            iter_args = iter(expr.args)
+            next(iter_args)
+
+            # Add remaining args
+            for arg in iter_args:
                 self._make_edge(call_node, self._make_node(r'\",\"'))
-                self._make_edge(call_node, expr.args[i].visit(self))
+                self._make_edge(call_node, arg.visit(self))
 
         self._make_edge(call_node, self._make_node(r'\")\"'))
         return call_node
@@ -156,9 +182,30 @@ class ASTPrinter(ASTVisitor):
         return self._make_node(f'\\"{val}\\" ({typ})')
 
     def visit_identifier(self, expr: Identifier):
-        return self._make_node(f'\\"{expr.name()}\\"')
+        return self._make_id(expr.id)
 
     ### Utilities ###
+
+    def _create_body(self, body: Body):
+        body_node = self._make_node('<body>')
+        indent_node = self._make_node('INDENT')
+        self._make_edge(body_node, indent_node)
+
+        prev_node = body_node
+        for stmt in body.stmts:
+            stmt_node = self._make_node('<stmt>')
+            self._make_edge(prev_node, stmt_node)
+            self._make_edge(stmt_node, stmt.visit(self))
+            prev_node = stmt_node
+
+        dedent_node = self._make_node('DEDENT')
+        self._make_edge(body_node, dedent_node)
+        return body_node
+
+    def _make_id(self, token: Token) -> int:
+        id_node = self._make_node('IDENTIFIER')
+        self._make_edge(id_node, self._make_node(str(token)))
+        return id_node
 
     def _make_node(self, label: str) -> int:
         self.node_counter += 1

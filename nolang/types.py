@@ -17,7 +17,7 @@ class NolangInt(NolangType):
         super().__init__()
         self.value = int(value) # Force to int
 
-    def __repr__(self) -> str:
+    def type_name(self) -> str:
         return 'int'
 
     def __str__(self) -> str:
