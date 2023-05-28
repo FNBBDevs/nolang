@@ -4,8 +4,8 @@ from .resolver import Resolver
 
 from ..parser.expressions import *
 from ..parser.statements import *
-from ..types.callables import *
 from ..lexer.token import Tokens
+from ..types import *
 
 from ..runtime import RUNTIME_GLOBALS
 from ..exception import *
@@ -26,16 +26,16 @@ class Environment:
 
     def __init__(self, enclosing: Environment = None) -> None:
         self.enclosing: Environment = enclosing
-        self.values: dict[str, object] = {}
+        self.values: dict[str, NolangType] = {}
 
-    def define(self, id: Token, value = None):
+    def define(self, id: Token, value: NolangType):
         # Insert new entry in the dictionary in the most recent scope always!
         self.values[id.lexeme] = value
 
-    def get_at(self, id: Token, distance: int) -> object:
+    def get_at(self, id: Token, distance: int) -> NolangType:
         return self._env_at(distance).values[id.lexeme]
 
-    def get(self, id: Token) -> object:
+    def get(self, id: Token) -> NolangType:
         name = id.lexeme
 
         if name not in self.values:
@@ -43,7 +43,7 @@ class Environment:
 
         return self.values[name]
 
-    def assign_at(self, id: Token, new_value, distance: int) -> None:
+    def assign_at(self, id: Token, new_value: NolangType, distance: int) -> None:
         self._env_at(distance).values[id.lexeme] = new_value
 
     def assign(self, id: Token, new_value) -> None:
@@ -104,7 +104,7 @@ class Interpreter(ASTVisitor):
             return
 
         for cond, body in stmt.erm_bodies:
-            if cond.visit(self):
+            if self._to_truthy(cond.visit(self)):
                 self._execute_body(body)
                 return
 
@@ -154,7 +154,7 @@ class Interpreter(ASTVisitor):
         # Static initialization of arguments
         args = [ arg.visit(self) for arg in expr.args ]
 
-        if not self._is_type(callee, NolangCallable):
+        if not Interpreter._is_type(callee, NolangCallable):
             raise NotCallableException(expr.callee, expr.paren.line, expr.paren.file_name)
 
         callee: NolangCallable
@@ -164,83 +164,89 @@ class Interpreter(ASTVisitor):
         if arity != given:
             raise InvalidArgumentsException(expr.callee, arity, given, expr.paren.line, expr.paren.file_name)
 
-        return callee(self, args)
+        return callee(self, args, expr.paren.line, expr.paren.file_name)
 
     def visit_binexpr(self, expr: BinaryExpression):
-        val1 = expr.left.visit(self)
+        val1: NolangType = expr.left.visit(self)
 
         # Make OR and AND operators short-circuited, we DO NOT evaluate RHS unless we have to
         match expr.op.type_id:
             case Tokens.OR:
-                return Interpreter._to_truthy(val1) \
-                    or Interpreter._to_truthy(expr.right.visit(self))
+                return NolangBool(Interpreter._to_truthy(val1) \
+                    or Interpreter._to_truthy(expr.right.visit(self)))
 
             case Tokens.AND:
-                return Interpreter._to_truthy(val1) \
-                   and Interpreter._to_truthy(expr.right.visit(self))
+                return NolangBool(Interpreter._to_truthy(val1) \
+                   and Interpreter._to_truthy(expr.right.visit(self)))
 
         # All other operators will need RHS evaluated to work
-        val2 = expr.right.visit(self)
+        val2: NolangType = expr.right.visit(self)
 
         match expr.op.type_id:
-            case Tokens.EQUAL: return val1 == val2
-            case Tokens.NEQUAL: return val1 != val2
+            case Tokens.EQUAL: return NolangBool(val1.value == val2.value)
+            case Tokens.NEQUAL: return NolangBool(val1.value != val2.value)
             case Tokens.LESS_THAN:
                 Interpreter._check_ordering(val1, val2, expr.op)
-                return val1 < val2
+                return NolangBool(val1.value < val2.value)
 
             case Tokens.GREATER_THAN:
                 Interpreter._check_ordering(val1, val2, expr.op)
-                return val1 > val2
+                return NolangBool(val1.value > val2.value)
 
             case Tokens.LESS_THAN_EQ:
                 Interpreter._check_ordering(val1, val2, expr.op)
-                return val1 <= val2
+                return NolangBool(val1.value <= val2.value)
 
             case Tokens.GREATER_THAN_EQ:
                 Interpreter._check_ordering(val1, val2, expr.op)
-                return val1 >= val2
+                return NolangBool(val1.value >= val2.value)
 
             case Tokens.PLUS:
-                val1, val2 = Interpreter._check_summable(val1, val2, expr.op)
-                return val1 + val2
+                # NOTE: We use the 'safe' to-string functions which will catch any python exceptions that may be thrown
+                if Interpreter._is_type(val1, NolangString) \
+                or Interpreter._is_type(val2, NolangString):
+                    return NolangString(str(val1) + str(val2))
+
+                typ = Interpreter._check_numerics(val1, val2, expr.op)
+                return typ(val1.value + val2.value)
 
             case Tokens.MINUS:
-                Interpreter._check_numerics(val1, val2, expr.op)
-                return val1 - val2
+                typ = Interpreter._check_numerics(val1, val2, expr.op)
+                return typ(val1.value - val2.value)
 
             case Tokens.STAR:
-                Interpreter._check_numerics(val1, val2, expr.op)
-                return val1 * val2
+                typ = Interpreter._check_numerics(val1, val2, expr.op)
+                return typ(val1.value * val2.value)
 
             case Tokens.SLASH:
-                Interpreter._check_numerics(val1, val2, expr.op)
-                if val2 == 0:
+                typ = Interpreter._check_numerics(val1, val2, expr.op)
+                if val2.value == 0:
                     raise DivideByZeroException(expr.op.line, expr.op.file_name)
-                return val1 / val2
+                return typ(val1.value / val2.value)
 
             case Tokens.PERCENT:
-                Interpreter._check_numerics(val1, val2, expr.op)
-                return val1 % val2
+                Interpreter._check_types(val1, val2, expr.op, NolangInt)
+                return NolangInt(val1.value % val2.value)
 
             case Tokens.EXP:
-                Interpreter._check_numerics(val1, val2, expr.op)
-                return val1 ** val2
+                typ = Interpreter._check_numerics(val1, val2, expr.op)
+                return typ(val1.value ** val2.value)
 
         # This should never happen in a completed implementation, do it for debugging purposes
         raise Exception(f'Failed to interpret expression: {expr}')
 
     def visit_unexpr(self, expr: UnaryExpression):
-        val = expr.operand.visit(self)
+        value: NolangType = expr.operand.visit(self)
 
         match expr.op.type_id:
-            case Tokens.NOT: return not Interpreter._to_truthy(val)
+            case Tokens.NOT:
+                return NolangBool(not Interpreter._to_truthy(value))
             case Tokens.MINUS:
-                self._check_numeric(val, expr.op)
-                return -val
+                typ = self._check_numeric(value, expr.op)
+                return typ(-value.value)
             case Tokens.PLUS:
-                self._check_numeric(val, expr.op)
-                return +val
+                typ = self._check_numeric(value, expr.op)
+                return typ(+value.value)
 
         # This should never happen in a completed implementation, do it for debugging purposes
         raise Exception(f'Failed to interpret expression: {expr}')
@@ -278,65 +284,62 @@ class Interpreter(ASTVisitor):
 
     @staticmethod
     def _is_type(val, *types: type):
+        return Interpreter._which_type(val, types) is not None
+
+    @staticmethod
+    def _which_type(val, *types: type):
         for t in types:
             if isinstance(val, t):
-                return True
-
-        return False
+                return t
 
     @staticmethod
-    def _is_numeric(val):
-        return Interpreter._is_type(val, int, float)
-
-    @staticmethod
-    def _to_truthy(val):
-        if val is None: return False
-        if type(val) is bool: return val
-        if type(val) is int or type(val) is float: return val != 0
+    def _to_truthy(val: NolangType):
+        """ In Nolang, nol is False, False (nolang) is False (python), 0 and 0.0 are False, and everything else is True"""
+        if Interpreter._is_type(val, NolangNol): return False
+        if Interpreter._is_type(val, NolangBool): return val.value
+        if Interpreter._is_type(val, NolangInt, NolangFloat): return val.value != 0
         return True
 
     @staticmethod
     def _check_numeric(val, op: Token):
         """Checks if the value is of numeric type"""
-        Interpreter._check_type(val, op, int, float)
+        return Interpreter._check_type(val, op, NolangInt, NolangFloat)
 
     @staticmethod
     def _check_numerics(val1, val2, op: Token):
         """Checks if both values are of numeric type"""
-        Interpreter._check_numeric(val1, op)
-        Interpreter._check_numeric(val2, op)
+        typ1, typ2 = Interpreter._check_types(val1, val2, op, NolangInt, NolangFloat)
+
+        # Integers are promoted to float if second operand is float
+        if typ1 is NolangFloat or typ2 is NolangFloat:
+            return NolangFloat
+
+        return NolangInt
 
     @staticmethod
     def _check_ordering(val1, val2, op: Token):
         """Checks if there is an ordering between the two input values"""
-        Interpreter._check_types(val1, val2, op, int, float, str)
+        typ1, typ2 = Interpreter._check_types(val1, val2, op, NolangInt, NolangFloat, NolangString)
 
-        if type(val1) is str and type(val2) is not str \
-        or type(val2) is str and type(val1) is not str:
+        if Interpreter._is_type(val1, NolangString) and not Interpreter._is_type(val2, NolangString) \
+        or Interpreter._is_type(val2, NolangString) and not Interpreter._is_type(val1, NolangString):
             raise IncompatibleTypesException(op, val1, val2)
 
-    @staticmethod
-    def _check_summable(val1, val2, op: Token):
-        """
-        Checks if both values can be added together
-        potentially changing their types to make them summable
-        """
-        Interpreter._check_types(val1, val2, op, int, float, str)
-
-        if type(val1) is str or type(val2) is str:
-            val1 = str(val1)
-            val2 = str(val2)
-
-        return val1, val2
+        return typ1, typ2
 
     @staticmethod
     def _check_type(val, op, *types: type):
-        """Checks if value is any of the provided types"""
-        if not Interpreter._is_type(val, *types):
+        """Checks if value is any of the provided types and returns it"""
+        typ = Interpreter._which_type(val, *types)
+
+        if typ is None:
             raise InvalidTypeException(op, val)
+
+        return typ
 
     @staticmethod
     def _check_types(val1, val2, op, *types: type):
         """Checks if both values are any of the provided types"""
-        Interpreter._check_type(val1, op, *types)
-        Interpreter._check_type(val2, op, *types)
+        typ1 = Interpreter._check_type(val1, op, *types)
+        typ2 = Interpreter._check_type(val2, op, *types)
+        return typ1, typ2

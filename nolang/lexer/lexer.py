@@ -3,6 +3,7 @@ from .token import Token
 from .token import Tokens
 from .token import RESERVED_IDENTIFIERS
 
+from ..types import *
 from ..util import *
 from ..exception import *
 
@@ -202,7 +203,7 @@ class Lexer:
 
         # Consume closing quote
         self._advance()
-        self._gen_token(Tokens.STR_LITERAL, ''.join(val))
+        self._gen_token(Tokens.STR_LITERAL, NolangString(''.join(val)))
 
     def _process_number_literal(self) -> None:
         # Consume all next digits
@@ -216,11 +217,11 @@ class Lexer:
             while is_digit(self._peek()):
                 self._advance()
 
-            self._gen_token(Tokens.FLOAT_LITERAL, float(self._current_lexeme()))
+            self._gen_token(Tokens.FLOAT_LITERAL, NolangFloat(float(self._current_lexeme())))
             return
 
         # Otherwise we have an integer literal
-        self._gen_token(Tokens.INT_LITERAL, int(self._current_lexeme()))
+        self._gen_token(Tokens.INT_LITERAL, NolangInt(int(self._current_lexeme())))
 
     def _process_identifier(self) -> None:
         while is_alpha_numeric(self._peek()) or self._peek() == '_':
@@ -231,9 +232,9 @@ class Lexer:
 
         if token_type:
             match token_type:
-                case Tokens.TRUE: val = True
-                case Tokens.FALSE: val = False
-                case Tokens.NOL: val = None
+                case Tokens.TRUE: val = NolangBool(True)
+                case Tokens.FALSE: val = NolangBool(False)
+                case Tokens.NOL: val = NOL
 
         # If it's not an existing token then it's a user specified identifier
         else:
@@ -291,7 +292,7 @@ class Lexer:
         """Returns true if there are no characters left to process, else otherwise"""
         return self.current >= len(self.source)
 
-    def _gen_token(self, type_id, value = None) -> None:
+    def _gen_token(self, type_id, value: NolangType = None) -> None:
         """Generates a token of type_id with optional value at the current lexeme"""
         self.tokens.append(Token(type_id, '\0' if type_id == Tokens.EOF else self._current_lexeme(), self.line, self.file_name, value))
 
