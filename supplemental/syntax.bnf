@@ -51,6 +51,7 @@
 # exponentiation     **               highest
 
 <expr> ::= <assign_expr> .
+<args> ::= <expr> ( "," <expr> )* .
 
 <assign_expr> ::= IDENTIFIER "=" <assign_expr> | <or_expr> .
 
@@ -64,16 +65,22 @@
 <add_expr> ::= <mul_expr> ( ( "+" | "-" ) <mul_expr> )* .
 <mul_expr> ::= <sign_expr> ( ( "*" | "/" | "%" ) <sign_expr> )* .
 <sign_expr> ::= ( "+" | "-" ) <sign_expr> | <exp_expr> .
-<exp_expr> ::= <call_expr> ( "**" <sign_expr> )? .
+<exp_expr> ::= <primary> ( "**" <sign_expr> )? .
 
-<call_expr> ::= <factor> ( "(" ( <args> )? ")" )* .
-<args> ::= <expr> ( "," <expr> )* .
+# Primary expressions
+<primary> ::=
+      <atom> ( "(" ( <args> )? ")" )*
+    | <atom> ( "[" <expr> "]" )* .
 
-<factor> ::= INT_LITERAL
-           | FLOAT_LITERAL
-           | STR_LITERAL
-           | IDENTIFIER
-           | "True"
-           | "False"
-           | "nol"
-           | "(" <expr> ")" .
+<atom> ::=
+      INT_LITERAL
+    | FLOAT_LITERAL
+    | STR_LITERAL
+    | IDENTIFIER
+    | "True"
+    | "False"
+    | "nol"
+    | <list>
+    | "(" <expr> ")" .
+
+<list> ::= "[" ( <args> )? "]" .
