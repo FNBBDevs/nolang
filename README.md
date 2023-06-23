@@ -4,4 +4,6 @@ That's Nolan-G, Nolan-Language, or No-Language. Take your pick they all work! Th
 
 Ethan - personally, I think python is one of the faster programming languages!
 
+Nolan - I am really humbled to be included in the nolang dev team! I personally think we could become faster than ASM, maybe even binary code!
+
 Anyways to run it for local development, I assume you have python installed already (Python 3.11 is required since this project uses [exception groups](https://docs.python.org/3/library/exceptions.html#exception-groups)). A simple `python nolang.py` will do, which should launch interactive mode. Otherwise you can specify a file to interpret as an additional arg: `python nolang.py <file>`.
