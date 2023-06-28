@@ -68,9 +68,7 @@
 <exp_expr> ::= <primary> ( "**" <sign_expr> )? .
 
 # Primary expressions
-<primary> ::=
-      <atom> ( "(" ( <args> )? ")" )*
-    | <atom> ( "[" <expr> "]" )* .
+<primary> ::= <atom> ( "(" ( <args> )? ")" | "[" <expr> "]" )* .
 
 <atom> ::=
       INT_LITERAL
