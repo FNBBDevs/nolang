@@ -16,6 +16,7 @@ class Nolout(NolangCallable):
 
     def __call__(self, _, args: list[NolangType], *__):
         print(args[0])
+        return NOL
 
 class Nolin(NolangCallable):
     def arity(self) -> int:
