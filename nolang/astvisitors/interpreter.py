@@ -128,7 +128,7 @@ class Interpreter(ASTVisitor):
         stmt.expr.visit(self)
 
     def visit_return(self, stmt: ReturnStatement):
-        value = None
+        value = NOL # NOTE: Return NOL if there is no value!
         if stmt.has_value():
             value = stmt.value.visit(self)
 
@@ -164,7 +164,8 @@ class Interpreter(ASTVisitor):
         if arity != given:
             raise InvalidArgumentsException(expr.callee, arity, given, expr.paren.line, expr.paren.file_name)
 
-        return callee(self, args, expr.paren.line, expr.paren.file_name)
+        result = callee(self, args, expr.paren.line, expr.paren.file_name)
+        return result if result else NOL
 
     def visit_binexpr(self, expr: BinaryExpression):
         val1: NolangType = expr.left.visit(self)
