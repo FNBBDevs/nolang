@@ -125,15 +125,33 @@ class ASTPrinter(ASTVisitor):
 
         return return_node
 
-    def visit_assign(self, expr: AssignExpression):
+    def visit_identifier_assign(self, expr: IDAssignExpression):
         assign_node = self._make_node('<assign_expr>')
         self._make_edge(assign_node, self._make_id(expr.id))
         self._make_edge(assign_node, self._make_node(r'\"=\"'))
         self._make_edge(assign_node, expr.assign.visit(self))
         return assign_node
 
+    def visit_identifier_access(self, expr: IDAccessorExpression):
+        return self._make_id(expr.id)
+
+    def visit_index_access(self, expr: IndexAccessorExpression):
+        index_access_node = self._make_node('<primary>')
+        self._make_edge(index_access_node, expr.indexable.visit(self))
+        self._make_edge(index_access_node, self._make_node(r'\"[\"'))
+        self._make_edge(index_access_node, expr.index.visit(self))
+        self._make_edge(index_access_node, self._make_node(r'\"]\"'))
+        return index_access_node
+
+    def visit_index_assign(self, expr: IndexAssignExpression):
+        index_assign_node = self._make_node('<assign_expr>')
+        self._make_edge(index_assign_node, expr.accessor.visit(self))
+        self._make_edge(index_assign_node, self._make_node(r'\"=\"'))
+        self._make_edge(index_assign_node, expr.assign.visit(self))
+        return index_assign_node
+
     def visit_call(self, expr: CallExpression):
-        call_node = self._make_node('<call_expr>')
+        call_node = self._make_node('<primary>')
         self._make_edge(call_node, expr.callee.visit(self))
         self._make_edge(call_node, self._make_node(r'\"(\"'))
 
@@ -181,8 +199,24 @@ class ASTPrinter(ASTVisitor):
 
         return self._make_node(f'\\"{val}\\" ({typ})')
 
-    def visit_identifier(self, expr: Identifier):
-        return self._make_id(expr.id)
+    def visit_array_init(self, expr: ArrayInitializer):
+        array_node = self._make_node('<array_initializer>')
+        self._make_edge(array_node, self._make_node(r'\"[\"'))
+
+        if len(expr.values) > 0:
+            self._make_edge(array_node, expr.values[0].visit(self))
+
+            # Skip first entry
+            iter_args = iter(expr.values)
+            next(iter_args)
+
+            # Add remaining args
+            for arg in iter_args:
+                self._make_edge(array_node, self._make_node(r'\",\"'))
+                self._make_edge(array_node, arg.visit(self))
+
+        self._make_edge(array_node, self._make_node(r'\"]\"'))
+        return array_node
 
     ### Utilities ###
 

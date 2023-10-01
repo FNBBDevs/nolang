@@ -41,17 +41,64 @@ class UnaryExpression(Expression):
     def __repr__(self) -> str:
         return f'{self.op} ({self.operand})'
 
-class AssignExpression(Expression):
+class IDAccessorExpression(Expression):
+    """Accessor for identifiers"""
+
+    def __init__(self, id: Token) -> None:
+        super().__init__()
+        self.id = id
+
+    def visit(self, visitor: ASTVisitor):
+        return visitor.visit_identifier_access(self)
+
+    def name(self):
+        return self.id.value
+
+    def __repr__(self) -> str:
+        return self.name()
+
+class IDAssignExpression(Expression):
+    """Mutator for identifiers"""
+
     def __init__(self, id: Token, assign: Expression) -> None:
         super().__init__()
         self.id = id
         self.assign = assign
 
     def visit(self, visitor: ASTVisitor):
-        return visitor.visit_assign(self)
+        return visitor.visit_identifier_assign(self)
 
     def __repr__(self) -> str:
-        return f'{self.id} = {self.assign}'
+        return f'{self.token} = {self.assign}'
+
+class IndexAccessorExpression(Expression):
+    """Accessor for an array index"""
+
+    def __init__(self, indexable: Expression, bracket: Token, index: Expression) -> None:
+        super().__init__()
+        self.bracket = bracket
+        self.indexable = indexable
+        self.index = index
+
+    def visit(self, visitor: ASTVisitor):
+        return visitor.visit_index_access(self)
+
+    def __repr__(self) -> str:
+        return f'{self.indexable}[{self.index}]'
+
+class IndexAssignExpression(Expression):
+    """Mutator for an indexed value"""
+
+    def __init__(self, accessor: IndexAccessorExpression, assign: Expression) -> None:
+        super().__init__()
+        self.accessor = accessor
+        self.assign = assign
+
+    def visit(self, visitor: ASTVisitor):
+        return visitor.visit_index_assign(self)
+
+    def __repr__(self) -> str:
+        return f'{self.accessor} = {self.assign}'
 
 class CallExpression(Expression):
     def __init__(self, callee: Expression, paren: Token, args: list[Expression]) -> None:
@@ -82,18 +129,16 @@ class Literal(Expression):
     def __repr__(self) -> str:
         return str(self.token.value)
 
-class Identifier(Expression):
-    """Aliased value saved in the store"""
+class ArrayInitializer(Expression):
+    """Inline initialization of an array"""
 
-    def __init__(self, id: Token) -> None:
+    def __init__(self, values: list[Expression]) -> None:
         super().__init__()
-        self.id = id
+        self.values = values
 
     def visit(self, visitor: ASTVisitor):
-        return visitor.visit_identifier(self)
-
-    def name(self):
-        return self.id.value
+        return visitor.visit_array_init(self)
 
     def __repr__(self) -> str:
-        return self.name()
+        return repr(self.values)
+

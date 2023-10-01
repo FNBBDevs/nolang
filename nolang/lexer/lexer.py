@@ -132,6 +132,8 @@ class Lexer:
         match self._advance():
             case '(': self._gen_token(Tokens.L_PARENTHESIS)
             case ')': self._gen_token(Tokens.R_PARENTHESIS)
+            case '[': self._gen_token(Tokens.L_BRACKET)
+            case ']': self._gen_token(Tokens.R_BRACKET)
             case ',': self._gen_token(Tokens.COMMA)
             case '+': self._gen_token(Tokens.PLUS)
             case '-': self._gen_token(Tokens.MINUS)

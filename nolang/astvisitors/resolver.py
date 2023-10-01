@@ -109,9 +109,26 @@ class Resolver(ASTVisitor):
         if stmt.has_value():
             stmt.value.visit(self)
 
-    def visit_assign(self, expr: AssignExpression):
-        expr.assign.visit(self)
+    def visit_identifier_assign(self, expr: IDAssignExpression):
         self._resolve(expr, expr.id)
+        expr.assign.visit(self)
+
+    def visit_identifier_access(self, expr: IDAccessorExpression):
+        scope = self.scopes[-1]
+
+        # Catch user using unitialized variable in expression
+        if len(scope) > 0 and expr.name() in scope and not scope[expr.name()]:
+            raise UndefinedVariableUsage(expr.name(), expr.id.line, expr.id.file_name)
+
+        self._resolve(expr, expr.id)
+
+    def visit_index_access(self, expr: IndexAccessorExpression):
+        expr.indexable.visit(self)
+        expr.index.visit(self)
+
+    def visit_index_assign(self, expr: IndexAssignExpression):
+        expr.accessor.visit(self)
+        expr.assign.visit(self)
 
     def visit_call(self, expr: CallExpression):
         expr.callee.visit(self)
@@ -128,14 +145,9 @@ class Resolver(ASTVisitor):
     def visit_literal(self, _):
         return # Do nothing, literals are end-of-the-line.
 
-    def visit_identifier(self, expr: Identifier):
-        scope = self.scopes[-1]
-
-        # Catch user using unitialized variable in expression
-        if len(scope) > 0 and expr.name() in scope and not scope[expr.name()]:
-            raise UndefinedVariableUsage(expr.name(), expr.id.line, expr.id.file_name)
-
-        self._resolve(expr, expr.id)
+    def visit_array_init(self, expr: ArrayInitializer):
+        for element in expr.values:
+            element.visit(self)
 
     ### Utilities ###
 

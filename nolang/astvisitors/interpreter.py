@@ -1,4 +1,5 @@
 
+from typing_extensions import override
 from .astvisitor import ASTVisitor
 from .resolver import Resolver
 
@@ -134,7 +135,7 @@ class Interpreter(ASTVisitor):
 
         raise Return(value)
 
-    def visit_assign(self, expr: AssignExpression):
+    def visit_identifier_assign(self, expr: IDAssignExpression):
         value = expr.assign.visit(self)
         distance = self.bindings.get(expr)
 
@@ -147,6 +148,29 @@ class Interpreter(ASTVisitor):
             self.globals.assign(expr.id, value)
 
         return value
+
+    def visit_identifier_access(self, expr: IDAccessorExpression):
+        distance = self.bindings.get(expr)
+
+        # We know which environment local variables are in
+        if distance is not None:
+            return self.environment.get_at(expr.id, distance)
+
+        # Distance is None, this might be a global variable
+        else:
+            return self.globals.get(expr.id)
+
+    def visit_index_access(self, expr: IndexAccessorExpression):
+        indexable, index = self._try_get_indexable_and_index(expr)
+
+        return indexable[index]
+
+    def visit_index_assign(self, expr: IndexAssignExpression):
+        indexable, index = self._try_get_indexable_and_index(expr.accessor)
+
+        indexable[index] = expr.assign.visit(self)
+
+        return indexable[index]
 
     def visit_call(self, expr: CallExpression):
         callee = expr.callee.visit(self)
@@ -255,16 +279,8 @@ class Interpreter(ASTVisitor):
     def visit_literal(self, expr: Literal):
         return expr.value()
 
-    def visit_identifier(self, expr: Identifier):
-        distance = self.bindings.get(expr)
-
-        # We know which environment local variables are in
-        if distance is not None:
-            return self.environment.get_at(expr.id, distance)
-
-        # Distance is None, this might be a global variable
-        else:
-            return self.globals.get(expr.id)
+    def visit_array_init(self, expr: ArrayInitializer):
+        return NolangArray([ element.visit(self) for element in expr.values ])
 
     ### Utilities ###
 
@@ -282,6 +298,23 @@ class Interpreter(ASTVisitor):
         finally:
             # Always restore the previous environment
             self.environment = previous_env
+
+    def _try_get_indexable_and_index(self, expr: IndexAccessorExpression):
+        indexable = expr.indexable.visit(self)
+
+        if not Interpreter._is_type(indexable, NolangArray):
+            raise NotIndexableException(expr.indexable, expr.bracket.line, expr.bracket.file_name)
+
+        indexable: NolangArray
+        index = expr.index.visit(self)
+
+        Interpreter._check_type(index, expr.bracket, NolangInt)
+        index: NolangInt
+
+        if index.value < 0 or index.value > len(indexable.value) - 1:
+            raise OutOfBoundsException(expr.indexable, index.value, len(indexable.value), expr.bracket.line, expr.bracket.file_name)
+
+        return (indexable.value, index.value)
 
     @staticmethod
     def _is_type(val, *types: type):

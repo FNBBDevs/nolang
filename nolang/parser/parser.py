@@ -28,16 +28,10 @@ class Parser:
 
     def statement(self) -> Statement:
         try:
-            if self._next_is(Tokens.NO):
-                stmt = self.var_decl()
+            if self._next_is(Tokens.NO): return self.var_decl()
+            if self._next_is(Tokens.GREG): return self.fun_decl()
 
-            elif self._next_is(Tokens.GREG):
-                stmt = self.fun_decl()
-
-            else:
-                stmt = self.cmpd_stmt()
-
-            return stmt
+            return self.cmpd_stmt()
 
         except NolangException as e:
             self.exceptions.append(e)
@@ -149,14 +143,19 @@ class Parser:
 
         if self._next_is(Tokens.ASSIGN):
 
-            # Must be a valid lvalue target
-            if not isinstance(lhs, Identifier):
-                assign: Token = self._previous()
-                raise InvalidBindingException(lhs, assign.line, assign.file_name)
+            if isinstance(lhs, IDAccessorExpression):
+                # We know that we have an identifier now
+                lhs: IDAccessorExpression
+                return IDAssignExpression(lhs.id, self.assign_expr())
 
-            # We know that we have an identifier now
-            lhs: Identifier
-            return AssignExpression(lhs.id, self.assign_expr())
+            if isinstance(lhs, IndexAccessorExpression):
+                # We know that we have an index accessor now
+                lhs: IndexAccessorExpression
+                return IndexAssignExpression(lhs, self.assign_expr())
+
+            # Must be a valid lvalue target!
+            assign: Token = self._previous()
+            raise InvalidBindingException(lhs, assign.line, assign.file_name)
 
         return lhs
 
@@ -237,7 +236,7 @@ class Parser:
         return self.exp_expr()
 
     def exp_expr(self) -> Expression:
-        expr: Expression = self.call_expr()
+        expr: Expression = self.primary()
 
         if self._next_is(Tokens.EXP):
             op: Token = self._previous()
@@ -246,15 +245,23 @@ class Parser:
 
         return expr
 
-    def call_expr(self) -> Expression:
-        expr: Expression = self.factor()
+    def primary(self) -> Expression:
+        expr: Expression = self.atom()
 
-        while self._next_is(Tokens.L_PARENTHESIS):
-            expr = self._finish_call(expr)
+        while True:
+            if self._next_is(Tokens.L_PARENTHESIS):
+                expr = self._finish_call(expr)
+
+            elif self._next_is(Tokens.L_BRACKET):
+                index: Expression = self.expression()
+                bracket = self._consume(Tokens.R_BRACKET)
+                expr = IndexAccessorExpression(expr, bracket, index)
+
+            else: break
 
         return expr
 
-    def factor(self) -> Expression:
+    def atom(self) -> Expression:
         if self._next_is(
             Tokens.INT_LITERAL,
             Tokens.FLOAT_LITERAL,
@@ -265,7 +272,10 @@ class Parser:
             return Literal(self._previous())
 
         if self._next_is(Tokens.IDENTIFIER):
-            return Identifier(self._previous())
+            return IDAccessorExpression(self._previous())
+
+        if self._next_is(Tokens.L_BRACKET):
+            return self._finish_array()
 
         self._consume(Tokens.L_PARENTHESIS)
         expr: Expression = self.expression()
@@ -287,6 +297,19 @@ class Parser:
             stmts.append(self.statement())
 
         return Body(stmts)
+
+    def _finish_array(self) -> list[Expression]:
+        values: list[Expression] = []
+
+        if self._peek().type_id != Tokens.R_BRACKET:
+            values.append(self.expression())
+
+            while self._next_is(Tokens.COMMA):
+                expr = self.expression()
+                values.append(expr)
+
+        self._consume(Tokens.R_BRACKET)
+        return ArrayInitializer(values)
 
     def _finish_call(self, callee: Expression) -> CallExpression:
         args: list[Expression] = []

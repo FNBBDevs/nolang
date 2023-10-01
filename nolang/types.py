@@ -12,6 +12,9 @@ class NolangType:
     def __str__(self) -> str:
         return self.__class__.__name__
 
+    def __repr__(self) -> str:
+        return str(self)
+
 class NolangInt(NolangType):
     def __init__(self, value: int) -> None:
         super().__init__()
@@ -59,6 +62,21 @@ class NolangString(NolangType):
 
     def __str__(self) -> str:
         return self.value
+
+    def __repr__(self) -> str:
+        return f'\'{self}\''
+
+class NolangArray(NolangType):
+    def __init__(self, value: list) -> None:
+        super().__init__()
+        self.value = list(value) # Force to list
+
+    def type_name(self) -> str:
+        return 'array'
+
+    def __str__(self) -> str:
+        joined = ', '.join([ repr(element) for element in self.value ])
+        return f'[{joined}]'
 
 class NolangNol(NolangType):
     def __str__(self) -> str:

@@ -53,7 +53,7 @@
 <expr> ::= <assign_expr> .
 <args> ::= <expr> ( "," <expr> )* .
 
-<assign_expr> ::= IDENTIFIER "=" <assign_expr> | <or_expr> .
+<assign_expr> ::= <primary> "=" <assign_expr> | <or_expr> .
 
 <or_expr>  ::= <and_expr> ( "or"  <and_expr> )* .
 <and_expr> ::= <not_expr> ( "and" <not_expr> )* .
@@ -78,7 +78,7 @@
     | "True"
     | "False"
     | "nol"
-    | <list>
+    | <array_initializer>
     | "(" <expr> ")" .
 
-<list> ::= "[" ( <args> )? "]" .
+<array_initializer> ::= "[" ( <args> )? "]" .
