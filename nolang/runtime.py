@@ -73,6 +73,18 @@ class Colored(NolangCallable):
         
         except ValueError:
             raise RuntimeException(line, file_name, message=f'YUP')
+ 
+class Sleep(NolangCallable):
+    def arity(self) -> int:
+        return 1
+    
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
+        try:
+            time.sleep(args[0].value)
+            return NOL
+        
+        except TypeError:
+            raise RuntimeException(line, file_name, message=f'Invalid type {args[0].type_name()}')
 
 class Float(NolangCallable):
     def arity(self) -> int:
@@ -120,5 +132,6 @@ RUNTIME_GLOBALS: dict[str, NolangType] = \
     'roundup':    RoundUp(),
     'rounddown':  RoundDown(),
     'coloredout': ColoredOut(),
-    'colored':    Colored()
+    'colored':    Colored(),
+    'sleep':      Sleep(),
 }
