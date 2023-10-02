@@ -73,7 +73,7 @@ class Colored(NolangCallable):
         
         except ValueError:
             raise RuntimeException(line, file_name, message=f'YUP')
-
+ 
 class Sleep(NolangCallable):
     def arity(self) -> int:
         return 1
