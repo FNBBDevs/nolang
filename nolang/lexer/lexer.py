@@ -199,6 +199,7 @@ class Lexer:
                     case 'v':  next_char = '\v'
                     case 't':  next_char = '\t'
                     case 'a':  next_char = '\a'
+                    case '0':  next_char = '\0'
                     case   c:  self._error(UnknownEscapeSequenceException(c, self.line, self.file_name))
 
             val.append(next_char)
@@ -250,7 +251,6 @@ class Lexer:
 
         if self._next_is('\n'):
             self.line += 1
-
         else:
             self._error(CharacterUnexpectedException('\\', self.line, self.file_name))
 

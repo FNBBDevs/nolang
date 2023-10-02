@@ -74,9 +74,15 @@ class NolangArray(NolangType):
     def type_name(self) -> str:
         return 'array'
 
-    def __str__(self) -> str:
-        joined = ', '.join([ repr(element) for element in self.value ])
-        return f'[{joined}]'
+    def __len__(self) -> int:
+        return len(self.value)
+
+    def __getitem__(self, i):
+        return self.value[i]
+
+    def append(self, v):
+        self.value.append(v)
+
 
 class NolangNol(NolangType):
     def __str__(self) -> str:
