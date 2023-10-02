@@ -14,7 +14,7 @@ greg progress_bar()
         x = x + 1
         left = char_builder("=", x)
         right = char_builder(" ", 100 - x)
-        nolout(char_builder("\n", 30))
+        nolout(char_builder("\n", 100))
         nolout("[" + left + right + "]")
         sleep(0.05)
     while x < 100
