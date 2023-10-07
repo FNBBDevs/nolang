@@ -69,7 +69,7 @@ class Colored(NolangCallable):
     
     def __call__(self, _, args: list[NolangType], line: int, file_name: str):
         try:
-            return colored(args[0], color=args[1], on_color=args[2])
+            return NolangString(colored(args[0], color=args[1], on_color=args[2]).colored)
         
         except ValueError:
             raise RuntimeException(line, file_name, message=f'YUP')
