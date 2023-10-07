@@ -62,6 +62,9 @@ class ColoredOut(NolangCallable):
 
         except ValueError:
             raise RuntimeException(line, file_name, message=f'YUP')
+
+    def __str__(self) -> str:
+        return f'🤣 💀 😎 🥱 🤨, arity: 69!!'
         
 class Colored(NolangCallable):
     def arity(self) -> int:
@@ -73,6 +76,9 @@ class Colored(NolangCallable):
         
         except ValueError:
             raise RuntimeException(line, file_name, message=f'YUP')
+    
+    def __str__(self) -> str:
+        return f'🤣 💀 😎 🥱 🤨'
  
 class Sleep(NolangCallable):
     def arity(self) -> int:
