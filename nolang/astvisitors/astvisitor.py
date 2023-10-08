@@ -29,7 +29,16 @@ class ASTVisitor:
     def visit_return(self, stmt: ReturnStatement):
         raise NotImplementedError()
 
-    def visit_assign(self, expr: AssignExpression):
+    def visit_identifier_access(self, expr: IDAccessorExpression):
+        raise NotImplementedError()
+
+    def visit_identifier_assign(self, expr: IDAssignExpression):
+        raise NotImplementedError()
+
+    def visit_index_access(self, expr: IndexAccessorExpression):
+        raise NotImplementedError()
+
+    def visit_index_assign(self, expr: IndexAssignExpression):
         raise NotImplementedError()
 
     def visit_call(self, expr: CallExpression):
@@ -44,5 +53,7 @@ class ASTVisitor:
     def visit_literal(self, expr: Literal):
         raise NotImplementedError()
 
-    def visit_identifier(self, expr: Identifier):
+    def visit_array_init(self, expr: ArrayInitializer):
         raise NotImplementedError()
+
+

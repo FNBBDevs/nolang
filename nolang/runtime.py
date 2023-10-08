@@ -7,6 +7,7 @@ from .exception import *
 import time
 import random
 import math
+from bruhcolor import bruhcolored as colored
 
 # Implementations of runtime library objects
 
@@ -50,6 +51,29 @@ class Int(NolangCallable):
         except ValueError:
             raise RuntimeException(line, file_name, message=f'Cannot convert {args[0]} to int')
 
+class Color(NolangCallable):
+    def arity(self) -> int:
+        return 3
+
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
+        try:
+            return NolangColoredText(colored(args[0], color=args[1], on_color=args[2]))
+
+        except ValueError:
+            raise RuntimeException(line, file_name, message=f'YUP')
+
+class Sleep(NolangCallable):
+    def arity(self) -> int:
+        return 1
+
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
+        try:
+            time.sleep(args[0].value)
+            return NOL
+
+        except TypeError:
+            raise RuntimeException(line, file_name, message=f'Invalid type {args[0].type_name()}')
+
 class Float(NolangCallable):
     def arity(self) -> int:
         return 1
@@ -87,12 +111,14 @@ class RoundUp(NolangCallable):
 
 RUNTIME_GLOBALS: dict[str, NolangType] = \
 {
-    'nolout':    Nolout(),
-    'nolin':     Nolin(),
-    'time':      Time(),
-    'random':    Random(),
-    'int':       Int(),
-    'float':     Float(),
-    'roundup':   RoundUp(),
-    'rounddown': RoundDown(),
+    'nolout':     Nolout(),
+    'nolin':      Nolin(),
+    'time':       Time(),
+    'random':     Random(),
+    'int':        Int(),
+    'float':      Float(),
+    'roundup':    RoundUp(),
+    'rounddown':  RoundDown(),
+    'color':    Color(),
+    'sleep':      Sleep(),
 }

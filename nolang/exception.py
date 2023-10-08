@@ -124,6 +124,7 @@ class InvalidTypeException(RuntimeException):
         self.op = op
         self.operand = operand
 
+    # TODO: Operator/Operands might not always apply for this type of exception
     def __str__(self) -> str:
         return f'Invalid operand \'{self.operand.type_name()}\' for operator \'{self.op}\' {self._loc_to_str()}'
 
@@ -156,12 +157,20 @@ class VariableNotDefinedException(RuntimeException):
         return f'{self.name} has not been defined in this scope {self._loc_to_str()}'
 
 class NotCallableException(RuntimeException):
-    def __init__(self, callee: Expression, *args: object) -> None:
+    def __init__(self, expr: Expression, *args: object) -> None:
         super().__init__(*args)
-        self.callee = callee
+        self.expr = expr
 
     def __str__(self) -> str:
-        return f'{self.callee} is not a callable object {self._loc_to_str()}'
+        return f'{self.expr} is not a callable object {self._loc_to_str()}'
+
+class NotIndexableException(RuntimeException):
+    def __init__(self, expr: Expression, *args: object) -> None:
+        super().__init__(*args)
+        self.expr = expr
+
+    def __str__(self) -> str:
+        return f'{self.expr} is not an indexable object {self._loc_to_str()}'
 
 class InvalidArgumentsException(RuntimeException):
     def __init__(self, callee: Expression, arity: int, given: int, *args: object) -> None:
@@ -172,6 +181,16 @@ class InvalidArgumentsException(RuntimeException):
 
     def __str__(self) -> str:
         return f'{self.callee} requires {self.arity} arguments but {self.given} were provided {self._loc_to_str()}'
+
+class OutOfBoundsException(RuntimeException):
+    def __init__(self, indexable: Expression, index: int, size: int, *args: object) -> None:
+        super().__init__(*args)
+        self.indexable = indexable
+        self.index = index
+        self.size = size
+
+    def __str__(self) -> str:
+        return f'Index {self.index} out of bounds for {self.indexable} of size {self.size} {self._loc_to_str()}'
 
 # Non-exceptional exceptions
 
