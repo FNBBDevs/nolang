@@ -36,7 +36,7 @@ jobs:
             create-version-file D:\a\nolang\nolang\build\version.yml --outfile D:\a\nolang\nolang\build\version.txt
       - name: run pyinstaller
         run: |
-            pyinstaller --noconfirm --onedir --console --icon "D:\a\nolang\nolang\nolang.ico" --name "nolang" --version-file " D:\a\nolang\nolang\build\version.txt" --distpath D:\a\nolang\nolang\dist --add-data "D:\a\nolang\nolang;nolang\" "D:\a\nolang\nolang\nolang.py"
+            pyinstaller --noconfirm --onedir --console --icon "D:\a\nolang\nolang\nolang.ico" --name "nolang" --version-file " D:\a\nolang\nolang\build\version.txt" --distpath "D:\a\nolang\nolang\dist" --add-data "D:\a\nolang\nolang;nolang\" "D:\a\nolang\nolang\nolang.py"
       - name: package to zip
         run: Compress-Archive -Path D:\a\nolang\nolang\dist\nolang -Destination D:\a\nolang\nolang\dist.zip
       - uses: actions/upload-artifact@v2
