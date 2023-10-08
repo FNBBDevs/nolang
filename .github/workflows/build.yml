@@ -30,7 +30,7 @@ jobs:
           pip install -r requirements.txt
       - name: update build version from input
         run: |
-            python update_version.py ${{ github.event.inputs.version_tag }}
+            python build\update_version.py ${{ github.event.inputs.version_tag }}
       - name: create the version file
         run: |
             create-version-file D:\a\nolang\nolang\build\version.yml --outfile D:\a\nolang\nolang\build\version.txt
