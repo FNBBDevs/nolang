@@ -118,6 +118,17 @@ class RoundUp(NolangCallable):
         except TypeError:
             raise RuntimeException(line, file_name, message=f'Invalid type {args[0].type_name()}')
 
+class Type(NolangCallable):
+    def arity(self) -> int:
+        return 1
+
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
+        try:
+            return NolangString(args[0].type_name())
+
+        except TypeError:
+            raise RuntimeException(line, file_name, message=f'Could not get type for {args[0].value}')
+
 # Global runtime, this should be immutable!
 
 RUNTIME_GLOBALS: dict[str, NolangType] = \
@@ -133,4 +144,5 @@ RUNTIME_GLOBALS: dict[str, NolangType] = \
     'rounddown':  RoundDown(),
     'color':      Color(),
     'sleep':      Sleep(),
+    'type':       Type(),
 }

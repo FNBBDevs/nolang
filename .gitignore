@@ -167,3 +167,4 @@ cython_debug/
 *.bat
 
 my_samples/
+exe_build/
