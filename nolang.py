@@ -12,7 +12,7 @@ from nolang.exception import NolangException
 lex = Lexer()
 parser = Parser()
 
-__VERSION__ = "0.0.9.0"
+__VERSION__ = "0.0.8.0"
 
 # Usage: nolang [FILE] [OPTIONS]
 def main():
