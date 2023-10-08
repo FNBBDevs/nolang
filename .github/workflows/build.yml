@@ -21,10 +21,12 @@ jobs:
       - name: run pyinstaller
         run: |
             pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py"
+      - name: package to zip
+        run: zip -r -q D:\a\nolang\nolang\build\nolang.zip  D:\a\nolang\nolang\build\nolang
       - uses: actions/upload-artifact@v2
         with:
           name: nolang
-          path: D:\a\nolang\nolang\build\nolang
+          path: D:\a\nolang\nolang\build\nolang.zip
       - name: create release
         id: create_release
         uses: actions/create-release@v1
@@ -44,5 +46,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: nolang/*
-          asset_name: nolang
+          asset_path: D:\a\nolang\nolang\build\nolang.zip
+          asset_name: nolang.zip
+          asset_content_type: .zip
