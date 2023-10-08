@@ -24,7 +24,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: nolang
-          path: nolang/nolang.exe
+          path: D:\a\nolang\nolang\build\nolang\nolang.exe
 
       - name: create release
         id: create_release
@@ -45,6 +45,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: nolang/nolang.exe
+          asset_path: D:\a\nolang\nolang\build\nolang\nolang.exe
           asset_name: nolang.exe
           asset_content_type: application/zip
