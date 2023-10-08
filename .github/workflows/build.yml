@@ -1,0 +1,60 @@
+name: Manual Nolang Build Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: "Version of the build"
+        default: "0.0.0"
+      name:
+        description: "Name for this release"
+        default: "Generic Release Name"
+      release_body:
+        description: "Body for the release"
+        default: "Generic Release Body"
+      
+jobs:
+  build-windows:
+    permissions: write-all
+    runs-on: windows-2019
+    steps:
+      - name: checkout
+        uses: actions/checkout@v1
+      - name: install python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.11'
+          architecture: 'x64'
+      - name: install requirements
+        run: |
+          pip install -r requirements.txt
+      - name: run pyinstaller
+        run: |
+            pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py" --distpath D:\a\nolang\nolang\dist
+      - name: package to zip
+        run: Compress-Archive -Path D:\a\nolang\nolang\dist\nolang -Destination D:\a\nolang\nolang\dist.zip
+      - uses: actions/upload-artifact@v2
+        with:
+          name: nolang
+          path: D:\a\nolang\nolang\dist.zip
+      - name: create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.inputs.version_tag }}
+          release_name: ${{ github.event.inputs.name }}
+          body: ${{ github.event.inputs.release_body }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{steps.create_release.outputs.upload_url}}
+          asset_path: D:\a\nolang\nolang\dist.zip
+          asset_name: dist.zip
+          asset_content_type: .zip

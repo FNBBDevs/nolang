@@ -84,6 +84,17 @@ class Float(NolangCallable):
 
         except ValueError:
             raise RuntimeException(line, file_name, message=f'Cannot convert {args[0]} to float')
+        
+class String(NolangCallable):
+    def arity(self) -> int:
+        return 1
+
+    def __call__(self, _, args: list[NolangType], line: int, file_name: str):
+        try:
+            return NolangString(args[0].value)
+
+        except ValueError:
+            raise RuntimeException(line, file_name, message=f'Cannot convert {args[0]} to string')
 
 class RoundDown(NolangCallable):
     def arity(self) -> int:
@@ -117,8 +128,9 @@ RUNTIME_GLOBALS: dict[str, NolangType] = \
     'random':     Random(),
     'int':        Int(),
     'float':      Float(),
+    'string':     String(),
     'roundup':    RoundUp(),
     'rounddown':  RoundDown(),
-    'color':    Color(),
+    'color':      Color(),
     'sleep':      Sleep(),
 }
