@@ -5,7 +5,7 @@
 nolout(color('This is some colored text', 'cyan', nol))
 
 # Use color codes from 0-255 instead of color names
-# See all possible colors: https://github.com/FNBBDevs/bruhcolor/blob/main/bruhcolor/bruhcolor.py#L103C5-L103C5
+# See all possible colors: https://github.com/FNBBDevs/bruhcolor#readme
 nolout(color('This is using color-id codes', 27, nol))
 
 # Use it for logging messages
