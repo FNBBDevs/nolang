@@ -1,8 +1,18 @@
-name: Build Workflow
+name: Manual Nolang Build Workflow
 
 on:
-  push:
-#    branches: main
+  workflow_dispatch:
+    inputs:
+      version_tag:
+        description: "Version of the build"
+        default: "0.0.0"
+      name:
+        description: "Name for this release"
+        default: "Generic Release Name"
+      release_body:
+        description: "Body for the release"
+        default: "Generic Release Body"
+      
 jobs:
   build-windows:
     permissions: write-all
@@ -33,8 +43,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.head_commit.message }}
-          release_name: ${{ github.event.head_commit.message }}
+          tag_name: ${{ github.event.inputs.version_tag }}
+          release_name: ${{ github.event.inputs.name }}
+          body: ${{ github.event.inputs.release_body }}
           draft: false
           prerelease: false
       - name: Upload Release Asset
