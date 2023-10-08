@@ -5,7 +5,7 @@ on:
     inputs:
       version_tag:
         description: "Version of the build"
-        default: "0.0.0"
+        default: "0.0.0.0"
       name:
         description: "Name for this release"
         default: "Generic Release Name"
@@ -30,7 +30,7 @@ jobs:
           pip install -r requirements.txt
       - name: update build version from input
         run: |
-            python build\update_version.py ${{ github.event.inputs.version_tag }}
+            python D:\a\nolang\nolang\build\update_version.py ${{ github.event.inputs.version_tag }}
       - name: create the version file
         run: |
             create-version-file D:\a\nolang\nolang\build\version.yml --outfile D:\a\nolang\nolang\build\version.txt
