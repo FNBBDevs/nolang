@@ -20,13 +20,13 @@ jobs:
           pip install -r requirements.txt
       - name: run pyinstaller
         run: |
-            pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py"
+            pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py" --distpath D:\a\nolang\nolang\dist
       - name: package to zip
-        run: Compress-Archive -Path D:\a\nolang\nolang\build\nolang\* -Destination D:\a\nolang\nolang\build\nolang.zip
+        run: Compress-Archive -Path D:\a\nolang\nolang\dist -Destination D:\a\nolang\nolang\dist.zip
       - uses: actions/upload-artifact@v2
         with:
           name: nolang
-          path: D:\a\nolang\nolang\build\nolang.zip
+          path: D:\a\nolang\nolang\dist.zip
       - name: create release
         id: create_release
         uses: actions/create-release@v1
@@ -46,6 +46,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
-          asset_path: D:\a\nolang\nolang\build\nolang.zip
+          asset_path: D:\a\nolang\nolang\dist.zip
           asset_name: nolang.zip
           asset_content_type: .zip
