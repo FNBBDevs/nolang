@@ -1,6 +1,9 @@
 
+from bruhcolor import bruhcolorwrapper
+
 from .parser.statements import FunDeclaration
 from .exception import *
+from .util import *
 
 class NolangType:
     def __init__(self) -> None:
@@ -74,6 +77,10 @@ class NolangArray(NolangType):
     def type_name(self) -> str:
         return 'array'
 
+    def __str__(self) -> str:
+        joined = ', '.join([ repr(element) for element in self.value ])
+        return f'[{joined}]'
+
     def __len__(self) -> int:
         return len(self.value)
 
@@ -83,6 +90,32 @@ class NolangArray(NolangType):
     def append(self, v):
         self.value.append(v)
 
+class NolangColoredText: pass
+class NolangColoredText(NolangType):
+    def __init__(self, value: bruhcolorwrapper):
+        super().__init__()
+        assert is_type(value, bruhcolorwrapper), "NolangColoredText requires a bruhcolorwrapper"
+        self.value = value
+
+    def type_name(self) -> str:
+        return 'ColoredText'
+
+    def __str__(self) -> str:
+        return self.value.colored
+
+    def __repr__(self) -> str:
+        return repr(self.value.colored)
+
+    def append(self, other: NolangType) -> NolangColoredText:
+        assert is_type(other, NolangString, NolangColoredText), 'NolangColoredText can only append string or NolangColoredText!'
+        return NolangColoredText(self.value + other.value)
+
+    def prepend(self, other: NolangType) -> NolangColoredText:
+        assert is_type(other, NolangString, NolangColoredText), 'NolangColoredText can only prepend string or NolangColoredText!'
+        new_color: bruhcolorwrapper = self.value.copy() # Make NolangColoredText immutable!!!
+        new_color.text = other.value + new_color.text
+        new_color.colored = other.value + new_color.colored
+        return NolangColoredText(new_color)
 
 class NolangNol(NolangType):
     def __str__(self) -> str:

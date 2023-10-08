@@ -1,5 +1,4 @@
 
-from typing_extensions import override
 from .astvisitor import ASTVisitor
 from .resolver import Resolver
 
@@ -10,6 +9,8 @@ from ..types import *
 
 from ..runtime import RUNTIME_GLOBALS
 from ..exception import *
+
+from ..util import *
 
 class Environment: pass
 class Environment:
@@ -178,7 +179,7 @@ class Interpreter(ASTVisitor):
         # Static initialization of arguments
         args = [ arg.visit(self) for arg in expr.args ]
 
-        if not Interpreter._is_type(callee, NolangCallable):
+        if not is_type(callee, NolangCallable):
             raise NotCallableException(expr.callee, expr.paren.line, expr.paren.file_name)
 
         callee: NolangCallable
@@ -227,9 +228,19 @@ class Interpreter(ASTVisitor):
                 return NolangBool(val1.value >= val2.value)
 
             case Tokens.PLUS:
+                if  is_type(val1, NolangColoredText) \
+                and is_type(val2, NolangString, NolangColoredText):
+                    val1: NolangColoredText
+                    return val1.append(val2)
+
+                if  is_type(val1, NolangString) \
+                and is_type(val2, NolangColoredText):
+                    val2: NolangColoredText
+                    return val2.prepend(val1)
+
                 # NOTE: We use the 'safe' to-string functions which will catch any python exceptions that may be thrown
-                if Interpreter._is_type(val1, NolangString) \
-                or Interpreter._is_type(val2, NolangString):
+                if is_type(val1, NolangString) \
+                or is_type(val2, NolangString):
                     return NolangString(str(val1) + str(val2))
 
                 typ = Interpreter._check_numerics(val1, val2, expr.op)
@@ -302,7 +313,7 @@ class Interpreter(ASTVisitor):
     def _try_get_indexable_and_index(self, expr: IndexAccessorExpression):
         indexable = expr.indexable.visit(self)
 
-        if not Interpreter._is_type(indexable, NolangArray):
+        if not is_type(indexable, NolangArray):
             raise NotIndexableException(expr.indexable, expr.bracket.line, expr.bracket.file_name)
 
         indexable: NolangArray
@@ -317,21 +328,11 @@ class Interpreter(ASTVisitor):
         return (indexable.value, index.value)
 
     @staticmethod
-    def _is_type(val, *types: type):
-        return Interpreter._which_type(val, types) is not None
-
-    @staticmethod
-    def _which_type(val, *types: type):
-        for t in types:
-            if isinstance(val, t):
-                return t
-
-    @staticmethod
     def _to_truthy(val: NolangType):
         """ In Nolang, nol is False, False (nolang) is False (python), 0 and 0.0 are False, and everything else is True"""
-        if Interpreter._is_type(val, NolangNol): return False
-        if Interpreter._is_type(val, NolangBool): return val.value
-        if Interpreter._is_type(val, NolangInt, NolangFloat): return val.value != 0
+        if is_type(val, NolangNol): return False
+        if is_type(val, NolangBool): return val.value
+        if is_type(val, NolangInt, NolangFloat): return val.value != 0
         return True
 
     @staticmethod
@@ -355,8 +356,8 @@ class Interpreter(ASTVisitor):
         """Checks if there is an ordering between the two input values"""
         typ1, typ2 = Interpreter._check_types(val1, val2, op, NolangInt, NolangFloat, NolangString)
 
-        if Interpreter._is_type(val1, NolangString) and not Interpreter._is_type(val2, NolangString) \
-        or Interpreter._is_type(val2, NolangString) and not Interpreter._is_type(val1, NolangString):
+        if is_type(val1, NolangString) and not is_type(val2, NolangString) \
+        or is_type(val2, NolangString) and not is_type(val1, NolangString):
             raise IncompatibleTypesException(op, val1, val2)
 
         return typ1, typ2
@@ -364,7 +365,7 @@ class Interpreter(ASTVisitor):
     @staticmethod
     def _check_type(val, op, *types: type):
         """Checks if value is any of the provided types and returns it"""
-        typ = Interpreter._which_type(val, *types)
+        typ = which_type(val, *types)
 
         if typ is None:
             raise InvalidTypeException(op, val)
