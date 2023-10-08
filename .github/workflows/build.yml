@@ -22,7 +22,7 @@ jobs:
         run: |
             pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py"
       - name: package to zip
-        run: zip -r -q D:\a\nolang\nolang\build\nolang.zip  D:\a\nolang\nolang\build\nolang
+        run: Compress-Archive -Path D:\a\nolang\nolang\build\nolang\* -Destination D:\a\nolang\nolang\build\nolang.zip
       - uses: actions/upload-artifact@v2
         with:
           name: nolang
