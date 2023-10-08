@@ -1,1 +1,2 @@
-bruhcolor==0.0.52
+bruhcolor==0.0.63
+pyinstaller==6.0.0
