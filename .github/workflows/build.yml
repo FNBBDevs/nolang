@@ -25,23 +25,17 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: nolang
-          path: D:\a\nolang\nolang\build\nolang
-      - name: Get tag name from ref
-        shell: bash
-        run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
-        id: get_tag
-      - name: Create tag in public repository
-        run: |
-            git tag ${{ steps.get_tag.outputs.tag }}
-            git push --tags --porcelain         
+          path: D:\a\nolang\nolang\build\nolang         
       - name: create release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_tag.outputs.tag }}
-          release_name: Release ${{ steps.get_tag.outputs.tag }}
+          tag_name: ${{ github.event.head_commit.message }}
+          release_name: ${{ github.event.head_commit.message }}
+          body: |
+            Full nolang folder
           draft: false
           prerelease: false
       - name: Upload Release Asset
