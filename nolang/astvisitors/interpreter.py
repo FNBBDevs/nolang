@@ -228,15 +228,13 @@ class Interpreter(ASTVisitor):
                 return NolangBool(val1.value >= val2.value)
 
             case Tokens.PLUS:
-                if  is_type(val1, NolangColoredText) \
-                and is_type(val2, NolangString, NolangColoredText):
+                if is_type(val1, NolangColoredText):
                     val1: NolangColoredText
-                    return val1.append(val2)
+                    return val1.append(str(val2))
 
-                if  is_type(val1, NolangString) \
-                and is_type(val2, NolangColoredText):
+                if is_type(val2, NolangColoredText):
                     val2: NolangColoredText
-                    return val2.prepend(val1)
+                    return val2.prepend(str(val1))
 
                 # NOTE: We use the 'safe' to-string functions which will catch any python exceptions that may be thrown
                 if is_type(val1, NolangString) \

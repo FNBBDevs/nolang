@@ -106,15 +106,13 @@ class NolangColoredText(NolangType):
     def __repr__(self) -> str:
         return repr(self.value.colored)
 
-    def append(self, other: NolangType) -> NolangColoredText:
-        assert is_type(other, NolangString, NolangColoredText), 'NolangColoredText can only append string or NolangColoredText!'
-        return NolangColoredText(self.value + other.value)
+    def append(self, other) -> NolangColoredText:
+        return NolangColoredText(self.value + str(other))
 
-    def prepend(self, other: NolangType) -> NolangColoredText:
-        assert is_type(other, NolangString, NolangColoredText), 'NolangColoredText can only prepend string or NolangColoredText!'
+    def prepend(self, other) -> NolangColoredText:
         new_color: bruhcolorwrapper = self.value.copy() # Make NolangColoredText immutable!!!
-        new_color.text = other.value + new_color.text
-        new_color.colored = other.value + new_color.colored
+        new_color.text = str(other) + new_color.text
+        new_color.colored = str(other) + new_color.colored
         return NolangColoredText(new_color)
 
 class NolangNol(NolangType):
