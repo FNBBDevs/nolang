@@ -12,6 +12,8 @@ from nolang.exception import NolangException
 lex = Lexer()
 parser = Parser()
 
+__VERSION__ = "0.0.8.0"
+
 # Usage: nolang [FILE] [OPTIONS]
 def main():
     if '--ast' in sys.argv:
@@ -29,6 +31,9 @@ def main():
 def interactive(visitor: ASTVisitor):
     def read_line(prompt: str):
         return input(prompt).rstrip()
+    
+    print('    _   __      __                 \n   / | / /___  / /___ _____  ____ _\n  /  |/ / __ \\/ / __ `/ __ \\/ __ `/\n / /|  / /_/ / / /_/ / / / / /_/ / \n/_/ |_/\\____/_/\\__,_/_/ /_/\\__, /  \n                          /____/   ')
+    print(f"Copyright (c) 2023 FNBBDevs - v{__VERSION__}\n")
 
     while True:
         line = read_line('>>> ')

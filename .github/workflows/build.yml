@@ -28,9 +28,15 @@ jobs:
       - name: install requirements
         run: |
           pip install -r requirements.txt
+      - name: update build version from input
+        run: |
+            python update_version.py ${{ github.event.inputs.version_tag }}
+      - name: create the version file
+        run: |
+            create-version-file D:\a\nolang\nolang\build\version.yml --outfile D:\a\nolang\nolang\build\version.txt
       - name: run pyinstaller
         run: |
-            pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py" --distpath D:\a\nolang\nolang\dist
+            pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --name "nolang" --version-file " D:\a\nolang\nolang\build\version.txt" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py" --distpath D:\a\nolang\nolang\dist
       - name: package to zip
         run: Compress-Archive -Path D:\a\nolang\nolang\dist\nolang -Destination D:\a\nolang\nolang\dist.zip
       - uses: actions/upload-artifact@v2
