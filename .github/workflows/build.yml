@@ -26,17 +26,23 @@ jobs:
         with:
           name: nolang
           path: D:\a\nolang\nolang\build\nolang
-
+      - name: Get tag name from ref
+        shell: bash
+        run: echo "::set-output name=tag::${GITHUB_REF#refs/tags/}"
+        id: get_tag
+      - name: Create tag in public repository
+        run: |
+            cd ${{github.workspace}}/another_public_repo
+            git tag ${{ steps.get_tag.outputs.tag }}
+            git push --tags --porcelain         
       - name: create release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.head_commit.message }}
-          release_name: ${{ github.event.head_commit.message }}
-          body: |
-            Full nolang folder
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          release_name: Release ${{ steps.get_tag.outputs.tag }}
           draft: false
           prerelease: false
       - name: Upload Release Asset
