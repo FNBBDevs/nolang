@@ -2,7 +2,7 @@ name: Build Workflow
 
 on:
   push:
-#    branches: master
+#    branches: main
 jobs:
   build-windows:
     permissions: write-all
@@ -22,7 +22,7 @@ jobs:
         run: |
             pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py" --distpath D:\a\nolang\nolang\dist
       - name: package to zip
-        run: Compress-Archive -Path D:\a\nolang\nolang\dist -Destination D:\a\nolang\nolang\dist.zip
+        run: Compress-Archive -Path D:\a\nolang\nolang\dist\nolang -Destination D:\a\nolang\nolang\dist.zip
       - uses: actions/upload-artifact@v2
         with:
           name: nolang
@@ -35,8 +35,6 @@ jobs:
         with:
           tag_name: ${{ github.event.head_commit.message }}
           release_name: ${{ github.event.head_commit.message }}
-          body: |
-            Full nolang folder
           draft: false
           prerelease: false
       - name: Upload Release Asset
@@ -47,5 +45,5 @@ jobs:
         with:
           upload_url: ${{steps.create_release.outputs.upload_url}}
           asset_path: D:\a\nolang\nolang\dist.zip
-          asset_name: nolang.zip
+          asset_name: dist.zip
           asset_content_type: .zip
