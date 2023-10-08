@@ -20,7 +20,7 @@ jobs:
           pip install -r requirements.txt
       - name: run pyinstaller
         run: |
-            pyinstaller --noconfirm --onedir --console --icon "./nolang/nolang.ico" --add-data "./nolang/nolang;nolang/"  "./nolang/nolang.py"
+            pyinstaller --noconfirm --onedir --console --icon "../nolang/nolang.ico" --add-data "../nolang/nolang;nolang/"  "../nolang/nolang.py"
       - uses: actions/upload-artifact@v2
         with:
           name: nolang
@@ -34,7 +34,6 @@ jobs:
         with:
           tag_name: ${{ github.event.head_commit.message }}
           release_name: ${{ github.event.head_commit.message }}
-          overwrite: true
           body: |
             Test Release v1.0.0
           draft: false
