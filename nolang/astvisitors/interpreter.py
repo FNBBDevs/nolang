@@ -281,6 +281,9 @@ class Interpreter(ASTVisitor):
             case Tokens.PLUS:
                 typ = self._check_numeric(value, expr.op)
                 return typ(+value.value)
+            case Tokens.SQUIRT:
+                typ = self._check_numeric(value, expr.op)
+                return typ(value.value ** (1/2))
 
         # This should never happen in a completed implementation, do it for debugging purposes
         raise Exception(f'Failed to interpret expression: {expr}')

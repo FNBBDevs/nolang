@@ -233,7 +233,16 @@ class Parser:
             right: Expression = self.sign_expr()
             return UnaryExpression(right, op)
 
-        return self.exp_expr()
+        return self.squirt_expr()
+    
+    def squirt_expr(self) -> Expression:
+        expr: Expression = self.exp_expr()
+
+        if self._next_is(Tokens.SQUIRT):
+            op: Token = self._previous()
+            return UnaryExpression(expr, op)
+
+        return expr
 
     def exp_expr(self) -> Expression:
         expr: Expression = self.primary()

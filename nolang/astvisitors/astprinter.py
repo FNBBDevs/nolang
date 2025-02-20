@@ -272,4 +272,5 @@ class ASTPrinter(ASTVisitor):
             case Tokens.NOT: return '<not_expr>'
             case Tokens.MINUS: return '<sign_expr>'
             case Tokens.PLUS: return '<sign_expr>'
+            case Tokens.SQUIRT: return '<squirt_expr>'
             case _: raise Exception(f'Unknown expression: {expr}')
