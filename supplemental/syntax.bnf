@@ -47,7 +47,7 @@
 # equalities        ==,!=               5
 # addition           +,-                6
 # multiplication    *,/,%               7
-# unary              +,-                8
+# unary              +,-, //            8
 # exponentiation     **               highest
 
 <expr> ::= <assign_expr> .
@@ -65,6 +65,7 @@
 <add_expr> ::= <mul_expr> ( ( "+" | "-" ) <mul_expr> )* .
 <mul_expr> ::= <sign_expr> ( ( "*" | "/" | "%" ) <sign_expr> )* .
 <sign_expr> ::= ( "+" | "-" ) <sign_expr> | <exp_expr> .
+<squirt_expr> ::= <exp_expr> ( "//" )? .
 <exp_expr> ::= <primary> ( "**" <sign_expr> )? .
 
 # Primary expressions
