@@ -3,12 +3,12 @@ import re
 
 if len(sys.argv) != 2:
     print("""Problem with argument.\n
-             Expected exactly one argument with new version number - e.g. '0.0.0.0'""")
+             Expected exactly one argument with new version number - e.g. '0.0.0'""")
     exit(1)
 
 new_version = sys.argv[1]
 
-if re.match(r"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+", new_version) == None:
+if re.match(r"[0-9]+\.[0-9]+\.[0-9]+", new_version) == None:
     print("Wrong format of argument:", new_version,
           "\nRequired format: 0.0.0.0")
     exit(1)
