@@ -41,7 +41,7 @@ def interactive(visitor: ASTVisitor):
     fnbb_devs = colored('FNBBDevs', color='27')
     version = colored(__VERSION__, color='82')
     url = 'https://github.com/FNBBDevs/nolang'
-    print(f'\nLicense - MIT: Copyright (c) 2023 {fnbb_devs}\nSource  - {url}\nVersion - {version}')
+    print(f'\nLicense - MIT: Copyright (c) 2025 {fnbb_devs}\nSource  - {url}\nVersion - {version}')
 
     # Nolang Logo
     logo = '    _   __      __                 \n   / | / /___  / /___ _____  ____ _\n  /  |/ / __ \\/ / __ `/ __ \\/ __ `/\n / /|  / /_/ / / /_/ / / / / /_/ / \n/_/ |_/\\____/_/\\__,_/_/ /_/\\__, /  \n                          /____/   '.split("\n")
