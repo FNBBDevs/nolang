@@ -44,6 +44,7 @@ class Tokens(Enum):
     NEWLINE         = auto()
     RETURN          = auto()
     BOUNCE          = auto()
+    SQUIRT          = auto()
 
 RESERVED_IDENTIFIERS = {
     'no': Tokens.NO,

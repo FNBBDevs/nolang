@@ -137,7 +137,7 @@ class Lexer:
             case ',': self._gen_token(Tokens.COMMA)
             case '+': self._gen_token(Tokens.PLUS)
             case '-': self._gen_token(Tokens.MINUS)
-            case '/': self._gen_token(Tokens.SLASH)
+            case '/': self._gen_token(Tokens.SQUIRT if self._next_is('/') else Tokens.SLASH)
             case '%': self._gen_token(Tokens.PERCENT)
             case '*': self._gen_token(Tokens.EXP if self._next_is('*') else Tokens.STAR)
             case '<': self._gen_token(Tokens.LESS_THAN_EQ if self._next_is('=') else Tokens.LESS_THAN)
