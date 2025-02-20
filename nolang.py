@@ -14,7 +14,7 @@ from bruhcolor import bruhcolored as colored
 lex = Lexer()
 parser = Parser()
 
-__VERSION__ = "0.0.8.0"
+__VERSION__ = '0.1.2'
 
 # Usage: nolang [FILE] [OPTIONS]
 def main():
@@ -31,7 +31,7 @@ def main():
         try:
             interactive(visitor)
         except KeyboardInterrupt:
-            print('🤓', end='')
+            print('☝️ 🤓', end='')
 
 def interactive(visitor: ASTVisitor):
     def read_line(prompt: str):

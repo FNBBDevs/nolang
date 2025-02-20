@@ -5,7 +5,7 @@ on:
     inputs:
       version_tag:
         description: "Version of the build"
-        default: "0.0.0.0"
+        default: "0.0.0"
       name:
         description: "Name for this release"
         default: "Generic Release Name"
