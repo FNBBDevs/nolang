@@ -78,4 +78,7 @@ def process(visitor: ASTVisitor, source: str, file_name: str):
             print(f'{e}', file=sys.stderr)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("☝️🤓")
