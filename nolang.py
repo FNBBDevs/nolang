@@ -9,6 +9,8 @@ from nolang.astvisitors.astprinter import ASTPrinter
 
 from nolang.exception import NolangException
 
+from bruhcolor import bruhcolored as colored
+
 lex = Lexer()
 parser = Parser()
 
@@ -26,17 +28,33 @@ def main():
         file(sys.argv[1], visitor)
 
     else:
-        interactive(visitor)
+        try:
+            interactive(visitor)
+        except KeyboardInterrupt:
+            print('🤓', end='')
 
 def interactive(visitor: ASTVisitor):
     def read_line(prompt: str):
         return input(prompt).rstrip()
     
-    print('    _   __      __                 \n   / | / /___  / /___ _____  ____ _\n  /  |/ / __ \\/ / __ `/ __ \\/ __ `/\n / /|  / /_/ / / /_/ / / / / /_/ / \n/_/ |_/\\____/_/\\__,_/_/ /_/\\__, /  \n                          /____/   ')
-    print(f"Copyright (c) 2023 FNBBDevs - v{__VERSION__}\n")
+    # Nolang Information
+    fnbb_devs = colored('FNBBDevs', color='27')
+    version = colored(__VERSION__, color='82')
+    url = 'https://github.com/FNBBDevs/nolang'
+    print(f'\nLicense - MIT: Copyright (c) 2023 {fnbb_devs}\nSource  - {url}\nVersion - {version}')
 
+    # Nolang Logo
+    logo = '    _   __      __                 \n   / | / /___  / /___ _____  ____ _\n  /  |/ / __ \\/ / __ `/ __ \\/ __ `/\n / /|  / /_/ / / /_/ / / / / /_/ / \n/_/ |_/\\____/_/\\__,_/_/ /_/\\__, /  \n                          /____/   '.split("\n")
+    colors = ['235', '236', '237', '239', '240', '241']
+    for line, color in zip(logo, colors):
+        print(colored(text=line, color=color))
+
+    # Nolang Shell
     while True:
         line = read_line('>>> ')
+
+        if line == 'exit':
+            return
 
         while line.endswith('\\'):
             line = f'{line[:-1]}\n{read_line("... ")}'
@@ -60,8 +78,4 @@ def process(visitor: ASTVisitor, source: str, file_name: str):
             print(f'{e}', file=sys.stderr)
 
 if __name__ == '__main__':
-    try:
-        main()
-
-    except KeyboardInterrupt:
-        print('🤓', end='')
+    main()

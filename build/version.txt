@@ -34,7 +34,7 @@ VSVersionInfo(
         StringStruct(u'FileDescription', u'Nolang'),
         StringStruct(u'FileVersion', u'0.0.8.0'),
         StringStruct(u'InternalName', u'Nolang CLI'),
-        StringStruct(u'LegalCopyright', u'Copyright (c) 2023 FNBBDevs'),
+        StringStruct(u'LegalCopyright', u'MIT License'),
         StringStruct(u'OriginalFilename', u'nolang.exe'),
         StringStruct(u'ProductName', u'nolang'),
         StringStruct(u'ProductVersion', u'0.0.8.0')])
