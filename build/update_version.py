@@ -10,7 +10,7 @@ new_version = sys.argv[1]
 
 if re.match(r"[0-9]+\.[0-9]+\.[0-9]+", new_version) == None:
     print("Wrong format of argument:", new_version,
-          "\nRequired format: 0.0.0.0")
+          "\nRequired format: 0.0.0")
     exit(1)
 
 """
