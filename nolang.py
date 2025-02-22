@@ -11,6 +11,8 @@ from nolang.exception import NolangException
 
 from bruhcolor import bruhcolored as colored
 
+from nolang.types import NOL
+
 lex = Lexer()
 parser = Parser()
 
@@ -28,6 +30,18 @@ def main():
         file(sys.argv[1], visitor)
 
     else:
+        # The Nolang REPL should print out expression statment values, so long as they aren't NOL
+        previous_exprstmt = visitor.visit_exprstmt
+
+        # This function assumes that the visitor returns a value on expression statements
+        def print_wrapper(expr):
+            val = previous_exprstmt(expr)
+            if val is not NOL:
+                print(val)
+
+        # Set this new wrapper
+        visitor.visit_exprstmt = print_wrapper
+
         try:
             interactive(visitor)
         except KeyboardInterrupt:
@@ -36,7 +50,7 @@ def main():
 def interactive(visitor: ASTVisitor):
     def read_line(prompt: str):
         return input(prompt).rstrip()
-    
+
     # Nolang Information
     fnbb_devs = colored('FNBBDevs', color='27')
     version = colored(__VERSION__, color='82')
