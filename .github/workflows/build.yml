@@ -3,64 +3,83 @@ name: Manual Nolang Build Workflow
 on:
   workflow_dispatch:
     inputs:
-      version_tag:
-        description: "Version of the build"
-        default: "0.0.0"
       name:
         description: "Name for this release"
         default: "Generic Release Name"
       release_body:
         description: "Body for the release"
         default: "Generic Release Body"
-      
+
 jobs:
   build-windows:
     permissions: write-all
     runs-on: windows-2019
     steps:
-      - name: checkout
-        uses: actions/checkout@v1
-      - name: install python
-        uses: actions/setup-python@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
           python-version: '3.11'
           architecture: 'x64'
-      - name: install requirements
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Determine new version
+        id: version_step
         run: |
-          pip install -r requirements.txt
-      - name: update build version from input
+          # Fetch all tags
+          git fetch --tags
+          # Get the latest tag, sort by version
+          latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "Latest tag: $latest_tag"
+          # Increment patch version (assuming semantic versioning)
+          IFS='.' read -r v1 v2 v3 <<< "${latest_tag/v/}"
+          v3=$((v3 + 1))
+          new_version="v$v1.$v2.$v3"
+          echo "New version: $new_version"
+          echo "::set-output name=version::$new_version"
+
+      - name: Update build version
         run: |
-            python D:\a\nolang\nolang\build\update_version.py ${{ github.event.inputs.version_tag }}
-      - name: create the version file
+          python D:\a\nolang\nolang\build\update_version.py ${{ steps.version_step.outputs.version }}
+
+      - name: Create the version file
+        run: create-version-file D:\a\nolang\nolang\build\version.yml --outfile D:\a\nolang\nolang\build\version.txt
+
+      - name: Run PyInstaller
         run: |
-            create-version-file D:\a\nolang\nolang\build\version.yml --outfile D:\a\nolang\nolang\build\version.txt
-      - name: run pyinstaller
-        run: |
-            pyinstaller --noconfirm --onedir --console --icon "D:\a\nolang\nolang\nolang.ico" --name "nolang" --version-file "build\version.txt" --distpath "D:\a\nolang\nolang\dist" --add-data "D:\a\nolang\nolang;nolang\" "D:\a\nolang\nolang\nolang.py"
-      - name: package to zip
+          pyinstaller --noconfirm --onedir --console --icon "D:\a\nolang\nolang\nolang.ico" --name "nolang" --version-file "build\version.txt" --distpath "D:\a\nolang\nolang\dist" --add-data "D:\a\nolang\nolang;nolang\" "D:\a\nolang\nolang\nolang.py"
+
+      - name: Package to zip
         run: Compress-Archive -Path D:\a\nolang\nolang\dist\nolang -Destination D:\a\nolang\nolang\dist.zip
-      - uses: actions/upload-artifact@v4
+
+      - uses: actions/upload-artifact@v2
         with:
           name: nolang
           path: D:\a\nolang\nolang\dist.zip
-      - name: create release
+
+      - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.inputs.version_tag }}
+          tag_name: ${{ steps.version_step.outputs.version }}
           release_name: ${{ github.event.inputs.name }}
           body: ${{ github.event.inputs.release_body }}
           draft: false
           prerelease: false
+
       - name: Upload Release Asset
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{steps.create_release.outputs.upload_url}}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: D:\a\nolang\nolang\dist.zip
           asset_name: dist.zip
-          asset_content_type: .zip
+          asset_content_type: application/zip
