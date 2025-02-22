@@ -86,7 +86,7 @@ class Interpreter(ASTVisitor):
             raise e
 
     def visit_vardecl(self, stmt: VarDeclaration):
-        value = None
+        value = NOL
         if stmt.has_initializer():
             value = stmt.init.visit(self)
 
@@ -127,7 +127,7 @@ class Interpreter(ASTVisitor):
             self._execute_body(stmt.bounce_body)
 
     def visit_exprstmt(self, stmt: ExprStatement):
-        stmt.expr.visit(self)
+        return stmt.expr.visit(self)
 
     def visit_return(self, stmt: ReturnStatement):
         value = NOL # NOTE: Return NOL if there is no value!
